@@ -55,6 +55,13 @@ class ShareLinkManager extends Component
         $this->generatedUrl = route('share.pin', $result['link']->token);
 
         unset($this->link);
+
+        $this->dispatch('share-link-generated', text: $this->clipboardText());
+    }
+
+    public function clipboardText(): string
+    {
+        return "Acompanhe meus registros no Âncora:\n{$this->generatedUrl}\n\nPIN de acesso: {$this->generatedPin}";
     }
 
     public function revoke(): void

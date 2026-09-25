@@ -48,6 +48,20 @@ test('expiration must be in the future', function () {
     expect($this->user->patient->shareLink)->toBeNull();
 });
 
+test('dispatches a browser event with the link and pin for clipboard copy', function () {
+    $component = Livewire::actingAs($this->user)
+        ->test(ShareLinkManager::class)
+        ->call('generate');
+
+    $link = $this->user->patient->shareLink;
+    $pin = $component->get('generatedPin');
+
+    $component->assertDispatched('share-link-generated', function (string $name, array $params) use ($link, $pin) {
+        return str_contains($params['text'], route('share.pin', $link->token))
+            && str_contains($params['text'], $pin);
+    });
+});
+
 test('can revoke the active link', function () {
     $component = Livewire::actingAs($this->user)->test(ShareLinkManager::class);
     $component->call('generate');

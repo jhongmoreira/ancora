@@ -1,4 +1,13 @@
-<div class="bg-white shadow sm:rounded-lg p-6 max-w-xl space-y-6">
+<div
+    class="bg-white shadow sm:rounded-lg p-6 max-w-xl space-y-6"
+    x-data="{ copied: false }"
+    x-on:share-link-generated.window="
+        navigator.clipboard.writeText($event.detail.text).then(() => {
+            copied = true;
+            setTimeout(() => copied = false, 4000);
+        });
+    "
+>
     <div>
         <h3 class="text-sm font-semibold text-gray-700 mb-1">Compartilhar com a psicóloga</h3>
         <p class="text-sm text-gray-500">
@@ -21,7 +30,20 @@
                 <input type="text" readonly value="{{ $generatedPin }}" onclick="this.select()" class="mt-1 block w-40 text-lg tracking-widest font-mono border-indigo-300 rounded-md bg-white" />
             </div>
 
-            <p class="text-xs text-indigo-600">Envie o link e o PIN pelos canais que preferir (WhatsApp, e-mail...), de preferência separadamente.</p>
+            <div class="flex items-center gap-3 pt-1">
+                <button
+                    type="button"
+                    x-on:click="navigator.clipboard.writeText(@js($this->clipboardText())).then(() => { copied = true; setTimeout(() => copied = false, 4000) })"
+                    class="text-xs font-semibold text-indigo-700 hover:text-indigo-900 underline"
+                >
+                    Copiar link + PIN de novo
+                </button>
+                <span x-show="copied" x-cloak class="text-xs text-green-600 font-medium">✓ Copiado! Já pode colar no WhatsApp.</span>
+            </div>
+
+            <p class="text-xs text-indigo-600" x-show="!copied">
+                Copiamos o link e o PIN juntos para a área de transferência — é só colar onde for enviar (WhatsApp, e-mail...).
+            </p>
         </div>
     @endif
 
