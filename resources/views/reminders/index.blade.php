@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             <div class="bg-white shadow sm:rounded-lg p-6" x-data="ancoraPushSubscription()">
                 <h3 class="text-sm font-semibold text-gray-700 mb-2">Notificações push</h3>
 

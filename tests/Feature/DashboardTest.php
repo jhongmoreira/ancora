@@ -161,3 +161,78 @@ test('heatmap only counts negative mood logs bucketed by weekday and period of d
         ->and($heatmap['grid']['Seg']['Manhã'])->toBe(1)
         ->and($heatmap['grid']['Seg']['Tarde'])->toBe(0);
 });
+
+test('triggers counts recurring words from negative situations only', function () {
+    $negative = MoodCategory::where('key', 'negativo')->first();
+    $positive = MoodCategory::where('key', 'positivo')->first();
+
+    foreach (['Reunião de trabalho difícil', 'Trabalho pesado hoje de novo'] as $situation) {
+        $this->user->patient->emotionLogs()->create([
+            'mood_category_id' => $negative->id,
+            'occurred_at' => now(),
+            'situation' => $situation,
+            'action' => 'A',
+        ]);
+    }
+
+    $this->user->patient->emotionLogs()->create([
+        'mood_category_id' => $positive->id,
+        'occurred_at' => now(),
+        'situation' => 'Trabalho tranquilo e produtivo',
+        'action' => 'A',
+    ]);
+
+    $component = Livewire::actingAs($this->user)->test(Dashboard::class)->set('period', '30d');
+    $triggers = $component->instance()->triggersData();
+
+    expect($triggers['total'])->toBe(2)
+        ->and($triggers['words'])->toHaveKey('trabalho')
+        ->and($triggers['words']['trabalho'])->toBe(2);
+});
+
+test('triggers ignores stopwords and short words', function () {
+    $negative = MoodCategory::where('key', 'negativo')->first();
+
+    $this->user->patient->emotionLogs()->create([
+        'mood_category_id' => $negative->id,
+        'occurred_at' => now(),
+        'situation' => 'Eu não sabia o que fazer com a situação',
+        'action' => 'A',
+    ]);
+
+    $component = Livewire::actingAs($this->user)->test(Dashboard::class)->set('period', '30d');
+    $words = array_keys($component->instance()->triggersData()['words']);
+
+    expect($words)->not->toContain('não')
+        ->and($words)->not->toContain('que')
+        ->and($words)->not->toContain('com')
+        ->and($words)->not->toContain('eu');
+});
+
+test('summary text reports total, dominant mood and top feeling', function () {
+    $negative = MoodCategory::where('key', 'negativo')->first();
+    $anxious = Feeling::where('mood_category_id', $negative->id)->first();
+
+    foreach (range(1, 3) as $_) {
+        $log = $this->user->patient->emotionLogs()->create([
+            'mood_category_id' => $negative->id,
+            'occurred_at' => now(),
+            'situation' => 'S',
+            'action' => 'A',
+        ]);
+        $log->feelings()->sync([$anxious->id]);
+    }
+
+    $component = Livewire::actingAs($this->user)->test(Dashboard::class)->set('period', '30d');
+    $summary = $component->instance()->summaryText();
+
+    expect($summary)->toContain('3 registros')
+        ->and($summary)->toContain(mb_strtolower($negative->label))
+        ->and($summary)->toContain($anxious->name);
+});
+
+test('summary text handles an empty period gracefully', function () {
+    $component = Livewire::actingAs($this->user)->test(Dashboard::class);
+
+    expect($component->instance()->summaryText())->toBe('Nenhum registro no período selecionado.');
+});

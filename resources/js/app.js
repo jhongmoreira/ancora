@@ -107,31 +107,27 @@ document.addEventListener('alpine:init', () => {
             this.charts.feelings = new Chart(this.$refs.feelingsCanvas, this.feelingsConfig(initial));
             this.charts.distribution = new Chart(this.$refs.distributionCanvas, this.distributionConfig(initial));
 
-            Livewire.on('dashboard-updated', (event) => {
-                const data = Array.isArray(event) ? event[0] : event;
+            // O Livewire empacota parâmetros nomeados do dispatch() num objeto
+            // ({ data: {...} }), não manda o valor direto nem envolvido num array.
+            Livewire.on('dashboard-updated', ({ data }) => {
                 this.updateCharts(data);
             });
         },
 
         updateCharts(data) {
-            this.charts.evolution.data.labels = data.labels;
-            this.charts.evolution.data.datasets = data.moodSeries.map((series) => ({
-                label: series.label,
-                data: series.data,
-                borderColor: series.color,
-                backgroundColor: series.color,
-                tension: 0.3,
-            }));
-            this.charts.evolution.update();
+            // Destruir e recriar em vez de mutar: trocar o array de datasets
+            // inteiro (mudando o número de pontos/rótulos) deixa o estado
+            // interno do Chart.js (legenda/layout) inconsistente ao chamar
+            // update() — reconstruir do zero é simples e o volume de dados
+            // aqui é pequeno o suficiente pra isso não pesar.
+            this.charts.evolution.destroy();
+            this.charts.evolution = new Chart(this.$refs.evolutionCanvas, this.evolutionConfig(data));
 
-            this.charts.feelings.data.labels = data.feelingLabels;
-            this.charts.feelings.data.datasets[0].data = data.feelingCounts;
-            this.charts.feelings.update();
+            this.charts.feelings.destroy();
+            this.charts.feelings = new Chart(this.$refs.feelingsCanvas, this.feelingsConfig(data));
 
-            this.charts.distribution.data.labels = data.distributionLabels;
-            this.charts.distribution.data.datasets[0].data = data.distribution;
-            this.charts.distribution.data.datasets[0].backgroundColor = data.distributionColors;
-            this.charts.distribution.update();
+            this.charts.distribution.destroy();
+            this.charts.distribution = new Chart(this.$refs.distributionCanvas, this.distributionConfig(data));
         },
 
         evolutionConfig(data) {

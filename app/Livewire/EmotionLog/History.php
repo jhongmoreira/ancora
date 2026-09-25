@@ -20,7 +20,7 @@ class History extends Component
     public bool $readOnly = false;
 
     #[Url]
-    public string $period = '30d';
+    public string $period = '15d';
 
     #[Url]
     public ?string $from = null;

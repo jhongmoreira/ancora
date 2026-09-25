@@ -1,6 +1,6 @@
 <div>
     <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div class="flex flex-wrap items-center gap-4">
+        <div class="flex flex-wrap items-end gap-4">
             <div>
                 <label class="block text-xs font-medium text-gray-500 mb-1">Período</label>
                 <select wire:model.live="period" class="text-sm border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
@@ -11,22 +11,25 @@
                 </select>
             </div>
 
-            <div class="flex items-center gap-2">
-                <span
-                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 text-xs font-medium"
-                    title="Dias com pelo menos um registro no período selecionado"
-                >
-                    📅 {{ $consistency['daysWithLogs'] }}/{{ $consistency['totalDays'] }} dias
-                </span>
-
-                @if ($streak['current'] > 0)
+            <div>
+                <span class="block text-xs mb-1 invisible" aria-hidden="true">Período</span>
+                <div class="flex items-center gap-2 h-[38px]">
                     <span
-                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-orange-50 text-orange-700 text-xs font-medium"
-                        title="Dias seguidos registrando (sequência atual)"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 text-xs font-medium"
+                        title="Dias com pelo menos um registro no período selecionado"
                     >
-                        🔥 {{ $streak['current'] }} {{ Str::plural('dia', $streak['current']) }} seguido{{ $streak['current'] > 1 ? 's' : '' }}
+                        📅 {{ $consistency['daysWithLogs'] }}/{{ $consistency['totalDays'] }} dias
                     </span>
-                @endif
+
+                    @if ($streak['current'] > 0)
+                        <span
+                            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-orange-50 text-orange-700 text-xs font-medium"
+                            title="Dias seguidos registrando (sequência atual)"
+                        >
+                            🔥 {{ $streak['current'] }} {{ Str::plural('dia', $streak['current']) }} seguido{{ $streak['current'] > 1 ? 's' : '' }}
+                        </span>
+                    @endif
+                </div>
             </div>
         </div>
 
@@ -43,6 +46,27 @@
             @unless ($readOnly)
                 <a href="{{ route('emotion-logs.create') }}" wire:navigate class="text-indigo-600 underline text-sm mt-2 inline-block">Fazer seu primeiro registro</a>
             @endunless
+        </div>
+    @else
+        <div class="bg-indigo-50 border border-indigo-100 rounded-lg p-4 mb-6">
+            <p class="text-sm text-indigo-900">📋 {{ $summary }}</p>
+        </div>
+
+        <div class="bg-white shadow sm:rounded-lg p-4 sm:p-6 mb-6">
+            <h3 class="text-sm font-semibold text-gray-700 mb-1">Palavras mais comuns nas situações</h3>
+            <p class="text-xs text-gray-400 mb-4">Termos que mais aparecem nas situações associadas a humor negativo — possíveis gatilhos recorrentes.</p>
+
+            @if (empty($triggers['words']))
+                <p class="text-sm text-gray-400">Sem registros de humor negativo suficientes no período pra identificar padrões.</p>
+            @else
+                <div class="flex flex-wrap gap-2">
+                    @foreach ($triggers['words'] as $word => $count)
+                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-50 text-red-700 text-xs font-medium">
+                            {{ $word }} <span class="text-red-400">({{ $count }})</span>
+                        </span>
+                    @endforeach
+                </div>
+            @endif
         </div>
     @endif
 

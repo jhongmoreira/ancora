@@ -44,10 +44,14 @@
             @endisset
 
             <main class="py-6">
-                <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {{ $slot }}
                 </div>
             </main>
+
+            <footer class="text-center text-xs text-gray-400 py-6">
+                Criado com ❤️ por Jhonathan Moreira &amp; Claude &middot; {{ date('Y') }}
+            </footer>
         </div>
     </body>
 </html>
