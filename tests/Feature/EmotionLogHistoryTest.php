@@ -48,6 +48,17 @@ test('lists only logs within the selected period', function () {
     expect($this->user->patient->emotionLogs()->count())->toBe(2);
 });
 
+test('quinzena period lists logs from the last 15 days only', function () {
+    createLog($this->user, 'positivo', now()->subDays(10), 'Dentro da quinzena');
+    createLog($this->user, 'positivo', now()->subDays(20), 'Fora da quinzena');
+
+    Livewire::actingAs($this->user)
+        ->test(History::class)
+        ->set('period', '15d')
+        ->assertSee('Dentro da quinzena')
+        ->assertDontSee('Fora da quinzena');
+});
+
 test('filters by mood category', function () {
     $positive = createLog($this->user, 'positivo', now(), 'Registro positivo');
     createLog($this->user, 'negativo', now(), 'Registro negativo');

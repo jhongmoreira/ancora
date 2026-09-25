@@ -60,6 +60,10 @@ VAPID_SUBJECT=mailto:seu-email@exemplo.com
 
 ## 8. Processo de deploy (Hostoo, via GitHub)
 
+> **Fluxo de branches**: o Hostoo faz deploy automático a cada commit na `main`. Todo desenvolvimento novo acontece na branch `develop`; só damos merge `develop` → `main` quando algo está pronto pra ir ao ar de propósito.
+>
+> **Commit e push só quando pedido explicitamente.** Ao trabalhar em várias mudanças pequenas em sequência (ex.: ajustes de UI, indo e voltando), **não** commitar nem dar push a cada alteração — deixar as mudanças no working tree e só rodar `git add`/`commit`/`push` quando o usuário pedir diretamente (ex.: "comita isso", "pode subir"). Isso evita histórico poluído com commits de "tentativa 1", "tentativa 2" no meio de um ajuste ainda sendo discutido.
+
 1. Local: garantir testes passando, `npm run build`, commitar `public/build/` atualizado, `git push` para o `main` do GitHub.
 2. No painel Hostoo, usar a opção de deploy que puxa do repositório GitHub (aponta para `jhongmoreira/ancora`, branch `main`) — isso resolve o "enviar os arquivos".
 3. Via SSH, dentro da pasta onde o painel clonou o projeto:

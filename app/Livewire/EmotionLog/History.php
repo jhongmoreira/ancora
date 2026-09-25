@@ -20,7 +20,7 @@ class History extends Component
     public bool $readOnly = false;
 
     #[Url]
-    public string $period = '30d';
+    public string $period = '15d';
 
     #[Url]
     public ?string $from = null;
@@ -102,13 +102,14 @@ class History extends Component
     {
         $this->from = match ($period) {
             '7d' => now()->subDays(6)->toDateString(),
+            '15d' => now()->subDays(14)->toDateString(),
             '30d' => now()->subDays(29)->toDateString(),
             'month' => now()->startOfMonth()->toDateString(),
             default => $this->from,
         };
 
         $this->to = match ($period) {
-            '7d', '30d', 'month' => now()->toDateString(),
+            '7d', '15d', '30d', 'month' => now()->toDateString(),
             default => $this->to,
         };
     }
