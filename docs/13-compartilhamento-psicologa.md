@@ -33,7 +33,8 @@ login/conta própria no Âncora.
 Em vez de duplicar a lógica de agregação/filtros, os componentes `Dashboard` e `EmotionLog\History` (docs/07, docs/09) foram generalizados:
 
 - Aceitam um `?Patient $patient` opcional no `mount()` — quando omitido, resolvem `Auth::user()->patient` (comportamento original, inalterado para o paciente logado); quando informado, operam sobre esse paciente (usado pela visão compartilhada).
-- Aceitam `bool $readOnly = false`. Quando `true`: os botões "Novo registro" ficam ocultos, e **os métodos de mutação (`confirmDelete`, `delete`) retornam sem efeito no servidor** — a UI escondida não é a única defesa, já que uma chamada direta ao componente Livewire (fora da UI) também é bloqueada.
+- Aceitam `bool $readOnly = false`. Quando `true`: os botões "Novo registro" ficam ocultos, e **os métodos de mutação (`confirmDelete`, `delete`) retornam sem efeito no servidor** — a UI escondida não é a única defesa, já que uma chamada direta ao componente Livewire (fora da UI) também é bloqueada. `readOnly` é `#[Locked]`, então o navegador não consegue desligá-lo.
+- Na visão compartilhada recebem também o `shareToken` (`#[Locked]`). O trait `Concerns\GuardsSharedAccess` revalida o link em **toda requisição do Livewire** (`hydrate`): o middleware `share.access` só protege a carga inicial da página, e as interações (período, datas, filtros, ordem) vão direto para `/livewire/update`. Se o link foi revogado, expirou, pertence a outro paciente ou o PIN não foi validado nesta sessão, o componente troca o paciente por um modelo vazio (nenhum dado volta ao navegador), pula o render e redireciona para `share.pin`, que mostra a tela de link inválido.
 - A view compartilhada usa um layout próprio (`layouts/share.blade.php` / `<x-share-layout>`), sem a navegação da área logada (registrar, lembretes, etc.), com um aviso fixo "Acesso compartilhado — somente leitura".
 
 ## 5. Decisões de segurança
@@ -41,7 +42,7 @@ Em vez de duplicar a lógica de agregação/filtros, os componentes `Dashboard` 
 - PIN sempre hasheado; nunca gravado nem logado em texto puro após a geração.
 - Token longo e aleatório na URL — o PIN é uma segunda camada, não a única proteção.
 - Rate limiting por token+IP nas tentativas de PIN.
-- Verificação de expiração a cada request às rotas protegidas (não só no momento do PIN), então revogar/expirar tem efeito imediato mesmo com a sessão já autenticada.
+- Verificação de expiração a cada request às rotas protegidas e a cada requisição do Livewire nos componentes compartilhados (não só no momento do PIN), então revogar/expirar tem efeito imediato mesmo com a sessão já autenticada e a página ainda aberta.
 - Somente leitura garantido no servidor, não só escondendo botões na UI.
 - Histórico de acesso (IP, dispositivo, data/hora) dá visibilidade ao paciente sobre quem usou o link — dado sensível (diário emocional), então essa transparência foi priorizada mesmo no escopo enxuto do app.
 
