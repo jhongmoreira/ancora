@@ -52,6 +52,20 @@ test('correct pin grants access to the dashboard and history', function () {
         ->assertSee('Situação sigilosa do paciente');
 });
 
+test('dashboard and history show the link expiration date', function () {
+    $this->post(route('share.verify', $this->link->token), ['pin' => $this->pin]);
+
+    $expiresLabel = $this->link->expires_at->format('d/m/Y');
+
+    $this->get(route('share.dashboard', $this->link->token))
+        ->assertOk()
+        ->assertSee($expiresLabel);
+
+    $this->get(route('share.history', $this->link->token))
+        ->assertOk()
+        ->assertSee($expiresLabel);
+});
+
 test('wrong pin is rejected', function () {
     $this->post(route('share.verify', $this->link->token), ['pin' => '000000'])
         ->assertSessionHasErrors('pin');

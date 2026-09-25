@@ -74,13 +74,13 @@ class ShareAccessController extends Controller
     {
         $link = $request->attributes->get('shareLink');
 
-        return view('share.dashboard', ['patient' => $link->patient, 'token' => $token]);
+        return view('share.dashboard', ['patient' => $link->patient, 'token' => $token, 'expiresAt' => $link->expires_at]);
     }
 
     public function history(Request $request, string $token)
     {
         $link = $request->attributes->get('shareLink');
 
-        return view('share.history', ['patient' => $link->patient, 'token' => $token]);
+        return view('share.history', ['patient' => $link->patient, 'token' => $token, 'expiresAt' => $link->expires_at]);
     }
 }

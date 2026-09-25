@@ -10,6 +10,7 @@ class ShareLayout extends Component
     public function __construct(
         public mixed $patient = null,
         public ?string $token = null,
+        public mixed $expiresAt = null,
     ) {}
 
     /**
