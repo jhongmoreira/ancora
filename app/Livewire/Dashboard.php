@@ -1,0 +1,108 @@
+<?php
+
+namespace App\Livewire;
+
+use App\Models\MoodCategory;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Computed;
+use Livewire\Component;
+
+class Dashboard extends Component
+{
+    protected const COLORS = [
+        'green' => '#16a34a',
+        'gray' => '#6b7280',
+        'red' => '#dc2626',
+    ];
+
+    public string $period = '30d';
+
+    public ?string $from = null;
+
+    public ?string $to = null;
+
+    public function mount(): void
+    {
+        $this->applyPeriodPreset($this->period);
+    }
+
+    public function updatedPeriod(string $value): void
+    {
+        $this->applyPeriodPreset($value);
+        $this->dispatch('dashboard-updated', data: $this->chartData());
+    }
+
+    protected function applyPeriodPreset(string $period): void
+    {
+        $this->from = match ($period) {
+            '7d' => now()->subDays(6)->toDateString(),
+            'month' => now()->startOfMonth()->toDateString(),
+            default => now()->subDays(29)->toDateString(),
+        };
+
+        $this->to = now()->toDateString();
+    }
+
+    #[Computed]
+    public function moodCategories()
+    {
+        return MoodCategory::orderBy('order')->get();
+    }
+
+    public function chartData(): array
+    {
+        $logs = Auth::user()->patient
+            ->emotionLogs()
+            ->with('feelings')
+            ->whereDate('occurred_at', '>=', $this->from)
+            ->whereDate('occurred_at', '<=', $this->to)
+            ->get();
+
+        $days = collect(CarbonPeriod::create($this->from, $this->to))
+            ->map(fn (Carbon $date) => $date->toDateString());
+
+        $moodCategories = $this->moodCategories;
+
+        $moodSeries = $moodCategories->map(function ($category) use ($logs, $days) {
+            $countsByDay = $logs->where('mood_category_id', $category->id)
+                ->groupBy(fn ($log) => $log->occurred_at->toDateString())
+                ->map->count();
+
+            return [
+                'label' => $category->label,
+                'color' => self::COLORS[$category->color] ?? '#6b7280',
+                'data' => $days->map(fn ($day) => $countsByDay->get($day, 0))->values(),
+            ];
+        })->values();
+
+        $feelingCounts = $logs->flatMap->feelings
+            ->groupBy('name')
+            ->map->count()
+            ->sortDesc()
+            ->take(8);
+
+        $distribution = $moodCategories->map(
+            fn ($category) => $logs->where('mood_category_id', $category->id)->count()
+        );
+
+        return [
+            'labels' => $days->map(fn ($day) => Carbon::parse($day)->format('d/m'))->values(),
+            'moodSeries' => $moodSeries,
+            'feelingLabels' => $feelingCounts->keys()->values(),
+            'feelingCounts' => $feelingCounts->values(),
+            'distributionLabels' => $moodCategories->pluck('label')->values(),
+            'distributionColors' => $moodCategories->pluck('color')->map(fn ($c) => self::COLORS[$c] ?? '#6b7280')->values(),
+            'distribution' => $distribution->values(),
+            'total' => $logs->count(),
+        ];
+    }
+
+    public function render()
+    {
+        return view('livewire.dashboard', [
+            'chartData' => $this->chartData(),
+        ]);
+    }
+}
