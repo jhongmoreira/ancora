@@ -4,11 +4,13 @@ Este é o ponto tecnicamente mais sensível do projeto: notificações precisam 
 
 ## 1. Manifest, ícones e instalabilidade
 
-`public/manifest.json` com `name`, `short_name` ("Âncora"), `start_url`, `display: "standalone"`, `theme_color`, `background_color`, e um conjunto de ícones (192x192, 512x512, incluindo versão "maskable" para Android). Referenciado no `<head>` de `resources/views/layouts/app.blade.php` via `<link rel="manifest" href="/manifest.json">` + meta tags de tema.
+`public/manifest.json` com `name`, `short_name` ("Âncora"), `start_url`, `display: "standalone"`, `theme_color`, `background_color`, e um conjunto de ícones (192x192, 512x512, incluindo versão "maskable" para Android). Referenciado no `<head>` de `resources/views/layouts/app.blade.php` via `<link rel="manifest" href="{{ asset('manifest.json') }}">` + meta tags de tema.
+
+> **Lição do deploy real**: a primeira versão usava caminhos fixos (`href="/manifest.json"`, `href="/icons/..."`, `register('/sw.js')`), que só funcionam se o app estiver na raiz do domínio. Isso quebrou tudo (404 no manifest, ícones e service worker) quando testamos rodar numa subpasta. Correção: `manifest.json`/ícones usam `asset()` no Blade; o `start_url`/`scope`/`icons[].src` **dentro** do `manifest.json` (arquivo estático, não passa pelo Laravel) usam caminhos **relativos sem barra inicial** (`"./dashboard"`, `"icons/icon-192.png"`), que o navegador resolve relativo à própria URL do manifest; e o registro do service worker em `resources/js/app.js` lê a URL base de uma meta tag (`<meta name="app-base-url" content="{{ url('/') }}">`) em vez de usar `/sw.js` fixo.
 
 ## 2. Service Worker
 
-`public/sw.js`, registrado via JS no layout principal (`navigator.serviceWorker.register('/sw.js')`). Responsabilidades mínimas:
+`public/sw.js`, registrado via JS no layout principal a partir da base correta (ver nota acima — `` `${appBaseUrl}/sw.js` ``, não `/sw.js` fixo). Responsabilidades mínimas:
 - Cache básico de shell estático (ícones, CSS/JS compilados) para permitir abrir o app mesmo offline (tela de "sem conexão", já que o registro emocional em si exige backend).
 - Listener de evento `push` — recebe o payload da notificação e exibe via `self.registration.showNotification(...)`.
 - Listener de `notificationclick` — abre/foca a aba do app na URL do registro emocional.
