@@ -13,6 +13,7 @@
 | 7 | Gráficos e dashboard | [09](./09-graficos-dashboard.md) | Fase 5 | Dashboard com os 3 gráficos comparativos |
 | 8 | Relatórios e exportação | [08](./08-relatorios-exportacao.md) | Fase 5 | Exportação PDF e Excel funcionando por período |
 | 9 | PWA e notificações | [10](./10-pwa-notificacoes.md) | Fases 1, 4 | App instalável, lembretes push funcionando ponta a ponta |
+| 9.5 | Compartilhamento com a psicóloga | [13](./13-compartilhamento-psicologa.md) | Fases 6, 7 | Link + PIN somente leitura, com histórico de acessos |
 | 10 | Deploy em produção | [11](./11-deploy-producao.md) | Todas anteriores | App publicado, acessível via HTTPS, com backup configurado |
 
 ## 2. Definition of Done por fase
@@ -26,12 +27,13 @@
 - **Gráficos**: os 3 gráficos refletem corretamente uma massa de dados de teste conhecida (números batem manualmente).
 - **Relatórios**: PDF e Excel gerados abrem corretamente e contêm todos os registros do período, com cabeçalho de paciente/psicóloga correto.
 - **PWA/notificações**: checklist completo do doc 10, seção 10, executado com sucesso.
+- **Compartilhamento com a psicóloga**: link gerado é acessível só com o PIN correto; PIN errado 3x bloqueia por 30 min; link revogado/expirado nega acesso mesmo com sessão já verificada; ações de escrita (excluir registro) ficam bloqueadas nessa visão.
 - **Deploy**: checklist completo do doc 11, seção 10, executado com sucesso em produção real.
 
 ## 3. Marcos
 
 - **MVP mínimo (uso pessoal já viável)**: Fases 1 a 6 (fundação até histórico). Já permite registrar e consultar emoções, mesmo sem gráficos/exportação/push.
-- **Versão completa (todos os requisitos do usuário)**: Fases 1 a 10.
+- **Versão completa (todos os requisitos do usuário)**: Fases 1 a 10, incluindo a 9.5 (compartilhamento).
 
 ## 4. Riscos e mitigação
 

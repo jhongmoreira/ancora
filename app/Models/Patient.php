@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Patient extends Model
 {
@@ -47,6 +48,16 @@ class Patient extends Model
     public function reminders(): HasMany
     {
         return $this->hasMany(Reminder::class);
+    }
+
+    public function shareLink(): HasOne
+    {
+        return $this->hasOne(ShareLink::class);
+    }
+
+    public function shareLinkAccesses(): HasMany
+    {
+        return $this->hasMany(ShareLinkAccess::class);
     }
 
     public function getAgeAttribute(): ?int

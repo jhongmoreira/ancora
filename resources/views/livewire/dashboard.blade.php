@@ -9,15 +9,19 @@
             </select>
         </div>
 
-        <a href="{{ route('emotion-logs.create') }}" wire:navigate class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
-            Novo registro
-        </a>
+        @unless ($readOnly)
+            <a href="{{ route('emotion-logs.create') }}" wire:navigate class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
+                Novo registro
+            </a>
+        @endunless
     </div>
 
     @if ($chartData['total'] === 0)
         <div class="bg-white shadow sm:rounded-lg p-10 text-center text-gray-500">
             <p>Nenhum registro no período selecionado ainda.</p>
-            <a href="{{ route('emotion-logs.create') }}" wire:navigate class="text-indigo-600 underline text-sm mt-2 inline-block">Fazer seu primeiro registro</a>
+            @unless ($readOnly)
+                <a href="{{ route('emotion-logs.create') }}" wire:navigate class="text-indigo-600 underline text-sm mt-2 inline-block">Fazer seu primeiro registro</a>
+            @endunless
         </div>
     @endif
 

@@ -163,10 +163,21 @@ Regra de negócio (validada na Form Request/Service, não no schema): **máximo 
 | `sent_date` | date | data (sem hora) do disparo |
 | `sent_at` | datetime | timestamp exato do envio |
 
-Constraint única `(reminder_id, sent_date)` — garante idempotência: mesmo que o comando `reminders:dispatch` rode mais de uma vez no mesmo dia para o mesmo lembrete (cron atrasado, reinício do servidor), o envio duplicado é evitado por uma tentativa de insert que falha silenciosamente (`firstOrCreate`/`insertOrIgnore`).
+Constraint única `(reminder_id, sent_date)` — garante idempotência: mesmo que o comando `reminders:dispatch` rode mais de uma vez no mesmo dia para o mesmo lembrete (cron atrasado, reinício do servidor), o envio duplicado é evitado por uma checagem `whereDate()` prévia + `catch` de `UniqueConstraintViolationException` na corrida rara (ver doc 10, seção 6 — `firstOrCreate` direto com uma coluna `date` cast se mostrou arriscado por causa de serialização inconsistente entre bancos).
 
 ### `push_subscriptions`
 Gerada automaticamente pela migration do pacote `laravel-notification-channels/webpush` (`php artisan vendor:publish` + `migrate`). Estrutura polimórfica padrão do pacote, associada ao model `User`.
+
+### `share_links` e `share_link_accesses` (doc 13)
+
+Adicionadas no módulo de compartilhamento com a psicóloga (pós-MVP):
+
+| Tabela | Campos principais |
+|---|---|
+| `share_links` | `patient_id` (único — 1 link por paciente), `token` (string aleatória, único), `pin_hash` (bcrypt do PIN de 6 dígitos), `expires_at` |
+| `share_link_accesses` | `patient_id` (não `share_link_id` — sobrevive a revogação/regeneração do link), `ip_address`, `user_agent`, `accessed_at` |
+
+Gerar um novo link é um `updateOrCreate` por `patient_id`: substitui token/PIN/expiração da mesma linha, invalidando o link anterior automaticamente.
 
 ## 3. Ordem das migrations
 

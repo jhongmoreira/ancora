@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\MoodCategory;
+use App\Models\Patient;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Auth;
@@ -17,14 +18,26 @@ class Dashboard extends Component
         'red' => '#dc2626',
     ];
 
+    public ?Patient $patient = null;
+
+    public bool $readOnly = false;
+
     public string $period = '30d';
 
     public ?string $from = null;
 
     public ?string $to = null;
 
-    public function mount(): void
+    /**
+     * @param  Patient|null  $patient  Quando omitido, usa o paciente do usuário
+     *                                 autenticado (uso normal). Passado explicitamente
+     *                                 (com $readOnly=true) na visão compartilhada com a
+     *                                 psicóloga (ver ShareLink).
+     */
+    public function mount(?Patient $patient = null, bool $readOnly = false): void
     {
+        $this->patient = $patient ?? Auth::user()?->patient;
+        $this->readOnly = $readOnly;
         $this->applyPeriodPreset($this->period);
     }
 
@@ -53,7 +66,7 @@ class Dashboard extends Component
 
     public function chartData(): array
     {
-        $logs = Auth::user()->patient
+        $logs = $this->patient
             ->emotionLogs()
             ->with('feelings')
             ->whereDate('occurred_at', '>=', $this->from)

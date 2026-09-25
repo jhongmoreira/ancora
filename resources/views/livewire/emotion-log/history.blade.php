@@ -86,16 +86,18 @@
                                 <button type="button" x-on:click="expanded = !expanded" class="text-xs text-indigo-600 mt-2" x-text="expanded ? 'ver menos' : 'ver completo'"></button>
                             </div>
 
-                            <div class="flex-shrink-0">
-                                @if ($confirmingDeleteId === $log->id)
-                                    <div class="flex gap-2">
-                                        <button type="button" wire:click="delete({{ $log->id }})" class="text-xs text-red-600 font-medium">Confirmar</button>
-                                        <button type="button" wire:click="cancelDelete" class="text-xs text-gray-500">Cancelar</button>
-                                    </div>
-                                @else
-                                    <button type="button" wire:click="confirmDelete({{ $log->id }})" class="text-xs text-gray-400 hover:text-red-600">Excluir</button>
-                                @endif
-                            </div>
+                            @unless ($readOnly)
+                                <div class="flex-shrink-0">
+                                    @if ($confirmingDeleteId === $log->id)
+                                        <div class="flex gap-2">
+                                            <button type="button" wire:click="delete({{ $log->id }})" class="text-xs text-red-600 font-medium">Confirmar</button>
+                                            <button type="button" wire:click="cancelDelete" class="text-xs text-gray-500">Cancelar</button>
+                                        </div>
+                                    @else
+                                        <button type="button" wire:click="confirmDelete({{ $log->id }})" class="text-xs text-gray-400 hover:text-red-600">Excluir</button>
+                                    @endif
+                                </div>
+                            @endunless
                         </div>
                     </div>
                 @endforeach
@@ -104,7 +106,9 @@
     @empty
         <div class="text-center py-16 text-gray-500">
             <p>Nenhum registro encontrado para o período/filtros selecionados.</p>
-            <a href="{{ route('emotion-logs.create') }}" wire:navigate class="text-indigo-600 underline text-sm mt-2 inline-block">Fazer um novo registro</a>
+            @unless ($readOnly)
+                <a href="{{ route('emotion-logs.create') }}" wire:navigate class="text-indigo-600 underline text-sm mt-2 inline-block">Fazer um novo registro</a>
+            @endunless
         </div>
     @endforelse
 

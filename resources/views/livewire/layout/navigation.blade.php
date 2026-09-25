@@ -45,6 +45,9 @@ new class extends Component
                     <x-nav-link :href="route('reminders.index')" :active="request()->routeIs('reminders.index')" wire:navigate>
                         {{ __('Lembretes') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('share.manage')" :active="request()->routeIs('share.manage')" wire:navigate>
+                        {{ __('Compartilhar') }}
+                    </x-nav-link>
                     <x-nav-link :href="route('patient.edit')" :active="request()->routeIs('patient.edit')" wire:navigate>
                         {{ __('Meus dados') }}
                     </x-nav-link>
@@ -110,6 +113,9 @@ new class extends Component
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('reminders.index')" :active="request()->routeIs('reminders.index')" wire:navigate>
                 {{ __('Lembretes') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('share.manage')" :active="request()->routeIs('share.manage')" wire:navigate>
+                {{ __('Compartilhar') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('patient.edit')" :active="request()->routeIs('patient.edit')" wire:navigate>
                 {{ __('Meus dados') }}

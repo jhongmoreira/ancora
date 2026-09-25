@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\PushSubscriptionController;
+use App\Http\Controllers\ShareAccessController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route(auth()->check() ? 'dashboard' : 'login'));
@@ -27,11 +28,25 @@ Route::middleware(['auth', 'onboarded'])->group(function () {
     Route::get('relatorios/excel', [ExportController::class, 'excel'])->name('reports.excel');
 
     Route::view('lembretes', 'reminders.index')->name('reminders.index');
+
+    Route::view('compartilhar', 'share.manage')->name('share.manage');
 });
 
 Route::middleware(['auth'])->group(function () {
     Route::post('push-subscriptions', [PushSubscriptionController::class, 'store'])->name('push-subscriptions.store');
     Route::delete('push-subscriptions', [PushSubscriptionController::class, 'destroy'])->name('push-subscriptions.destroy');
+});
+
+// Acesso público (sem login) para a psicóloga visualizar dashboard/histórico
+// via link + PIN — ver docs/13.
+Route::prefix('compartilhado/{token}')->group(function () {
+    Route::get('/', [ShareAccessController::class, 'showPin'])->name('share.pin');
+    Route::post('/', [ShareAccessController::class, 'verifyPin'])->name('share.verify');
+
+    Route::middleware('share.access')->group(function () {
+        Route::get('/dashboard', [ShareAccessController::class, 'dashboard'])->name('share.dashboard');
+        Route::get('/historico', [ShareAccessController::class, 'history'])->name('share.history');
+    });
 });
 
 require __DIR__.'/auth.php';

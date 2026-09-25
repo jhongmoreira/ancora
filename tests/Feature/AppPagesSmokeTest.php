@@ -21,4 +21,5 @@ test('main app pages render for an onboarded user', function (string $routeName)
     'emotion-logs.index',
     'reports.index',
     'reminders.index',
+    'share.manage',
 ]);

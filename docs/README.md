@@ -23,8 +23,9 @@ Implemente uma fase por vez, na ordem descrita em [`12-roadmap-e-fases.md`](./12
 - [x] [10 — PWA e Notificações](./10-pwa-notificacoes.md) — instalabilidade e lembretes via Web Push.
 - [ ] [11 — Deploy em Produção](./11-deploy-producao.md) — publicação em servidor **sem Docker**.
 - [x] [12 — Roadmap e Fases](./12-roadmap-e-fases.md) — ordem de execução, Definition of Done, riscos, backlog.
+- [x] [13 — Compartilhamento com a Psicóloga](./13-compartilhamento-psicologa.md) — link com PIN, somente leitura, histórico de acessos.
 
-**Status atual: fases 1-9 do roadmap implementadas e testadas** (fundação, auth, modelo de dados, cadastro de paciente, registro emocional, histórico, gráficos/dashboard, relatórios PDF/Excel, PWA/push) — falta apenas o deploy em produção (doc 11).
+**Status atual: fases 1-9 do roadmap + módulo de compartilhamento (doc 13) implementados e testados** (fundação, auth, modelo de dados, cadastro de paciente, registro emocional, histórico, gráficos/dashboard, relatórios PDF/Excel, PWA/push, compartilhamento com PIN) — falta apenas o deploy em produção (doc 11).
 
 ## Decisões-chave já fechadas
 

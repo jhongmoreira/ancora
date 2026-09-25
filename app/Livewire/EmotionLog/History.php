@@ -4,6 +4,7 @@ namespace App\Livewire\EmotionLog;
 
 use App\Models\Feeling;
 use App\Models\MoodCategory;
+use App\Models\Patient;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
@@ -13,6 +14,10 @@ use Livewire\WithPagination;
 class History extends Component
 {
     use WithPagination;
+
+    public ?Patient $patient = null;
+
+    public bool $readOnly = false;
 
     #[Url]
     public string $period = '30d';
@@ -39,8 +44,16 @@ class History extends Component
 
     public ?int $confirmingDeleteId = null;
 
-    public function mount(): void
+    /**
+     * @param  Patient|null  $patient  Quando omitido, usa o paciente do usuário
+     *                                 autenticado (uso normal). Passado explicitamente
+     *                                 (com $readOnly=true) na visão compartilhada com a
+     *                                 psicóloga (ver ShareLink).
+     */
+    public function mount(?Patient $patient = null, bool $readOnly = false): void
     {
+        $this->patient = $patient ?? Auth::user()?->patient;
+        $this->readOnly = $readOnly;
         $this->mood = is_array($this->mood) ? array_map('intval', $this->mood) : [];
         $this->feelings = is_array($this->feelings) ? array_map('intval', $this->feelings) : [];
         $this->applyPeriodPreset($this->period);
@@ -115,7 +128,7 @@ class History extends Component
     #[Computed]
     public function logs()
     {
-        return Auth::user()->patient
+        return $this->patient
             ->emotionLogs()
             ->with(['moodCategory', 'feelings'])
             ->when($this->from, fn ($q) => $q->whereDate('occurred_at', '>=', $this->from))
@@ -134,6 +147,10 @@ class History extends Component
 
     public function confirmDelete(int $id): void
     {
+        if ($this->readOnly) {
+            return;
+        }
+
         $this->confirmingDeleteId = $id;
     }
 
@@ -144,7 +161,11 @@ class History extends Component
 
     public function delete(int $id): void
     {
-        Auth::user()->patient->emotionLogs()->whereKey($id)->delete();
+        if ($this->readOnly) {
+            return;
+        }
+
+        $this->patient->emotionLogs()->whereKey($id)->delete();
         $this->confirmingDeleteId = null;
     }
 
