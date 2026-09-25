@@ -344,7 +344,85 @@ class Dashboard extends Component
             $parts[] = "humor negativo concentrado às {$dayPhrase} {$periodPhrase}";
         }
 
-        return ucfirst(implode(', ', $parts)).'.';
+        $sentences = [ucfirst(implode(', ', $parts)).'.'];
+
+        $withIntensity = $logs->whereNotNull('intensity');
+
+        if ($withIntensity->isNotEmpty()) {
+            $avgIntensity = round($withIntensity->avg('intensity'), 1);
+            $sentences[] = "Intensidade média informada: {$avgIntensity}/5 (em {$withIntensity->count()} de {$logs->count()} registros).";
+        }
+
+        return implode(' ', $sentences);
+    }
+
+    /**
+     * Tempo médio entre um registro de humor NEGATIVO e o próximo registro
+     * positivo ou neutro — uma aproximação de "velocidade de recuperação
+     * emocional", conceito central em terapia de regulação emocional/DBT.
+     *
+     * Olha além do `to` do período pra achar o "próximo" registro corretamente
+     * mesmo quando ele cai logo depois da borda do filtro (evita subestimar
+     * a recuperação de episódios negativos perto do fim do período).
+     */
+    public function recoveryData(): array
+    {
+        $negativeId = $this->moodCategories->firstWhere('key', 'negativo')?->id;
+        $positiveOrNeutralIds = $this->moodCategories->whereIn('key', ['positivo', 'neutro'])->pluck('id')->all();
+
+        $negativeLogs = $this->logsInPeriod()
+            ->where('mood_category_id', $negativeId)
+            ->sortBy('occurred_at')
+            ->values();
+
+        if ($negativeLogs->isEmpty()) {
+            return ['average' => null, 'count' => 0, 'analyzed' => 0];
+        }
+
+        $futureLogs = $this->patient->emotionLogs()
+            ->where('occurred_at', '>=', $negativeLogs->first()->occurred_at)
+            ->orderBy('occurred_at')
+            ->get(['id', 'mood_category_id', 'occurred_at']);
+
+        $recoveryHours = [];
+
+        foreach ($negativeLogs as $negativeLog) {
+            $next = $futureLogs->first(
+                fn ($log) => $log->occurred_at->gt($negativeLog->occurred_at)
+                    && in_array($log->mood_category_id, $positiveOrNeutralIds, true)
+            );
+
+            if ($next) {
+                $recoveryHours[] = $negativeLog->occurred_at->diffInMinutes($next->occurred_at) / 60;
+            }
+        }
+
+        if (empty($recoveryHours)) {
+            return ['average' => null, 'count' => 0, 'analyzed' => $negativeLogs->count()];
+        }
+
+        return [
+            'average' => round(array_sum($recoveryHours) / count($recoveryHours), 1),
+            'count' => count($recoveryHours),
+            'analyzed' => $negativeLogs->count(),
+        ];
+    }
+
+    /**
+     * Formata horas fracionárias em algo legível ("3h", "1 dia e 4h", "2 dias").
+     */
+    public function formatRecoveryDuration(float $hours): string
+    {
+        if ($hours < 24) {
+            return round($hours).'h';
+        }
+
+        $days = intdiv((int) round($hours), 24);
+        $remainingHours = (int) round($hours) % 24;
+
+        $label = $days.' '.Str::plural('dia', $days);
+
+        return $remainingHours > 0 ? "{$label} e {$remainingHours}h" : $label;
     }
 
     public function render()
@@ -356,6 +434,7 @@ class Dashboard extends Component
             'heatmap' => $this->heatmapData(),
             'triggers' => $this->triggersData(),
             'summary' => $this->summaryText(),
+            'recovery' => $this->recoveryData(),
         ]);
     }
 }

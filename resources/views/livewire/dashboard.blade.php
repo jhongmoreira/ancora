@@ -48,24 +48,50 @@
             @endunless
         </div>
     @else
-        <div class="bg-indigo-50 border border-indigo-100 rounded-lg p-4 mb-6">
-            <p class="text-sm text-indigo-900">📋 {{ $summary }}</p>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="bg-indigo-50 border border-indigo-100 rounded-lg p-4 sm:p-6">
+                <h3 class="text-sm font-semibold text-indigo-900 mb-4">📋 Resumo do período</h3>
+                <p class="text-sm text-indigo-900">{{ $summary }}</p>
+            </div>
+
+            <div class="bg-white shadow sm:rounded-lg p-4 sm:p-6">
+                <h3 class="text-sm font-semibold text-gray-700 mb-1">Palavras mais comuns nas situações</h3>
+                <p class="text-xs text-gray-400 mb-4">Termos que mais aparecem nas situações associadas a humor negativo — possíveis gatilhos recorrentes.</p>
+
+                @if (empty($triggers['words']))
+                    <p class="text-sm text-gray-400">Sem registros de humor negativo suficientes no período pra identificar padrões.</p>
+                @else
+                    <div class="flex flex-wrap gap-2">
+                        @foreach ($triggers['words'] as $word => $count)
+                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-50 text-red-700 text-xs font-medium">
+                                {{ $word }} <span class="text-red-400">({{ $count }})</span>
+                            </span>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
         </div>
 
         <div class="bg-white shadow sm:rounded-lg p-4 sm:p-6 mb-6">
-            <h3 class="text-sm font-semibold text-gray-700 mb-1">Palavras mais comuns nas situações</h3>
-            <p class="text-xs text-gray-400 mb-4">Termos que mais aparecem nas situações associadas a humor negativo — possíveis gatilhos recorrentes.</p>
+            <h3 class="text-sm font-semibold text-gray-700 mb-1">Velocidade de recuperação emocional</h3>
+            <p class="text-xs text-gray-400 mb-4">Tempo médio entre um registro de humor negativo e o próximo registro positivo ou neutro.</p>
 
-            @if (empty($triggers['words']))
-                <p class="text-sm text-gray-400">Sem registros de humor negativo suficientes no período pra identificar padrões.</p>
+            @if (is_null($recovery['average']))
+                <p class="text-sm text-gray-400">
+                    @if ($recovery['analyzed'] === 0)
+                        Nenhum registro de humor negativo no período selecionado.
+                    @else
+                        Ainda não há um registro positivo/neutro depois do(s) {{ $recovery['analyzed'] }} registro(s) negativo(s) do período — pode levar um tempo pra aparecer.
+                    @endif
+                </p>
             @else
-                <div class="flex flex-wrap gap-2">
-                    @foreach ($triggers['words'] as $word => $count)
-                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-red-50 text-red-700 text-xs font-medium">
-                            {{ $word }} <span class="text-red-400">({{ $count }})</span>
-                        </span>
-                    @endforeach
-                </div>
+                <p class="text-2xl font-semibold text-gray-800">
+                    {{ $this->formatRecoveryDuration($recovery['average']) }}
+                </p>
+                <p class="text-xs text-gray-400 mt-1">
+                    Média calculada sobre {{ $recovery['count'] }} {{ Str::plural('episódio', $recovery['count']) }} de humor negativo com recuperação identificada
+                    (de {{ $recovery['analyzed'] }} no período).
+                </p>
             @endif
         </div>
     @endif

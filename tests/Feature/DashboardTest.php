@@ -236,3 +236,96 @@ test('summary text handles an empty period gracefully', function () {
 
     expect($component->instance()->summaryText())->toBe('Nenhum registro no período selecionado.');
 });
+
+test('summary text mentions average intensity when informed', function () {
+    $mood = MoodCategory::first();
+
+    $this->user->patient->emotionLogs()->create([
+        'mood_category_id' => $mood->id,
+        'occurred_at' => now(),
+        'intensity' => 4,
+        'situation' => 'S',
+        'action' => 'A',
+    ]);
+    $this->user->patient->emotionLogs()->create([
+        'mood_category_id' => $mood->id,
+        'occurred_at' => now(),
+        'intensity' => null,
+        'situation' => 'S',
+        'action' => 'A',
+    ]);
+
+    $component = Livewire::actingAs($this->user)->test(Dashboard::class)->set('period', '30d');
+
+    expect($component->instance()->summaryText())
+        ->toContain('Intensidade média informada: 4/5 (em 1 de 2 registros).');
+});
+
+test('recovery time averages hours between negative logs and the next positive or neutral one', function () {
+    $negative = MoodCategory::where('key', 'negativo')->first();
+    $positive = MoodCategory::where('key', 'positivo')->first();
+
+    $this->user->patient->emotionLogs()->create([
+        'mood_category_id' => $negative->id,
+        'occurred_at' => now()->subHours(10),
+        'situation' => 'S',
+        'action' => 'A',
+    ]);
+    $this->user->patient->emotionLogs()->create([
+        'mood_category_id' => $positive->id,
+        'occurred_at' => now()->subHours(8), // 2h depois do negativo
+        'situation' => 'S',
+        'action' => 'A',
+    ]);
+
+    $this->user->patient->emotionLogs()->create([
+        'mood_category_id' => $negative->id,
+        'occurred_at' => now()->subHours(4),
+        'situation' => 'S',
+        'action' => 'A',
+    ]);
+    $this->user->patient->emotionLogs()->create([
+        'mood_category_id' => $positive->id,
+        'occurred_at' => now(), // 4h depois do segundo negativo
+        'situation' => 'S',
+        'action' => 'A',
+    ]);
+
+    $component = Livewire::actingAs($this->user)->test(Dashboard::class)->set('period', '30d');
+    $recovery = $component->instance()->recoveryData();
+
+    expect($recovery['count'])->toBe(2)
+        ->and($recovery['analyzed'])->toBe(2)
+        ->and($recovery['average'])->toBe(3.0); // média entre 2h e 4h
+});
+
+test('recovery time is null when there is no negative log yet', function () {
+    $component = Livewire::actingAs($this->user)->test(Dashboard::class);
+
+    expect($component->instance()->recoveryData())->toBe(['average' => null, 'count' => 0, 'analyzed' => 0]);
+});
+
+test('recovery time is null when a negative log has no subsequent positive or neutral log', function () {
+    $negative = MoodCategory::where('key', 'negativo')->first();
+
+    $this->user->patient->emotionLogs()->create([
+        'mood_category_id' => $negative->id,
+        'occurred_at' => now(),
+        'situation' => 'S',
+        'action' => 'A',
+    ]);
+
+    $component = Livewire::actingAs($this->user)->test(Dashboard::class)->set('period', '30d');
+    $recovery = $component->instance()->recoveryData();
+
+    expect($recovery['average'])->toBeNull()
+        ->and($recovery['analyzed'])->toBe(1);
+});
+
+test('formats recovery duration in hours and days', function () {
+    $component = Livewire::actingAs($this->user)->test(Dashboard::class)->instance();
+
+    expect($component->formatRecoveryDuration(3.0))->toBe('3h')
+        ->and($component->formatRecoveryDuration(26.0))->toBe('1 dia e 2h')
+        ->and($component->formatRecoveryDuration(48.0))->toBe('2 dias');
+});
