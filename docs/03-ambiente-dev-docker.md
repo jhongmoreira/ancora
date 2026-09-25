@@ -6,7 +6,7 @@
 
 - WSL2 com Ubuntu (ambiente atual do usuário).
 - Docker Engine + Docker Compose já instalados (confirmado: Docker 29.1.3, Compose v5.0.1).
-- Node.js instalado **direto no WSL2** (não em container) — usado apenas para `npm install && npm run build` dos assets (Vite). Produção também não roda Node, então essa escolha espelha o ambiente final.
+- Node.js **20+** instalado **direto no WSL2** (não em container) — usado apenas para `npm install && npm run build` dos assets (Vite). Produção também não roda Node, então essa escolha espelha o ambiente final. O projeto fixa a versão via `.nvmrc` (Node 22 LTS); rode `nvm use` antes de instalar/buildar.
 - Composer instalado no WSL2 (ou rodando via container `app` pontualmente — decidir conforme conveniência; recomenda-se instalar no host para autocomplete/IDE funcionarem bem).
 
 ## 2. Serviços do `docker-compose.yml`
@@ -31,7 +31,13 @@ RUN apt-get update && apt-get install -y \
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
+
+# Alinha o UID de www-data com o do usuário do WSL2, para que arquivos
+# criados via `docker compose exec app ...` já nasçam com o dono certo no host.
+RUN groupmod -o -g 1000 www-data && usermod -o -u 1000 www-data
 ```
+
+O serviço `app` do compose fixa `user: www-data` — como o UID de `www-data` no container (1000) é igual ao UID do usuário do WSL2, todo arquivo criado via `docker compose exec app ...` (composer, artisan, etc.) já nasce com o dono correto no host, sem precisar de `chown` depois.
 
 ## 4. Config Nginx (esqueleto)
 
