@@ -6,6 +6,7 @@
                 <label class="block text-xs font-medium text-gray-500 mb-1">Período</label>
                 <select wire:model.live="period" class="text-sm border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                     <option value="7d">Últimos 7 dias</option>
+                    <option value="15d">Última quinzena</option>
                     <option value="30d">Últimos 30 dias</option>
                     <option value="month">Este mês</option>
                     <option value="custom">Personalizado</option>
