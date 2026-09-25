@@ -138,8 +138,7 @@ class Dashboard extends Component
     }
 
     protected const PERIODS_OF_DAY = [
-        'Madrugada' => [0, 5],
-        'Manhã' => [6, 11],
+        'Manhã' => [0, 11],
         'Tarde' => [12, 17],
         'Noite' => [18, 23],
     ];
