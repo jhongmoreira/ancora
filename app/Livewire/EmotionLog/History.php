@@ -42,6 +42,10 @@ class History extends Component
     #[Url]
     public $feelings = [];
 
+    /** Ordem cronológica: 'asc' (mais antigos primeiro) ou 'desc' (mais recentes primeiro). */
+    #[Url]
+    public string $order = 'asc';
+
     public ?int $confirmingDeleteId = null;
 
     /**
@@ -56,7 +60,14 @@ class History extends Component
         $this->readOnly = $readOnly;
         $this->mood = is_array($this->mood) ? array_map('intval', $this->mood) : [];
         $this->feelings = is_array($this->feelings) ? array_map('intval', $this->feelings) : [];
+        $this->order = $this->order === 'desc' ? 'desc' : 'asc';
         $this->applyPeriodPreset($this->period);
+    }
+
+    public function toggleOrder(): void
+    {
+        $this->order = $this->order === 'asc' ? 'desc' : 'asc';
+        $this->resetPage();
     }
 
     public function updatedPeriod(string $value): void
@@ -136,7 +147,7 @@ class History extends Component
             ->when($this->to, fn ($q) => $q->whereDate('occurred_at', '<=', $this->to))
             ->when($this->mood, fn ($q) => $q->whereIn('mood_category_id', $this->mood))
             ->when($this->feelings, fn ($q) => $q->whereHas('feelings', fn ($f) => $f->whereIn('feelings.id', $this->feelings)))
-            ->orderByDesc('occurred_at')
+            ->orderBy('occurred_at', $this->order === 'desc' ? 'desc' : 'asc')
             ->paginate(20);
     }
 

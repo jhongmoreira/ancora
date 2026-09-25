@@ -41,6 +41,18 @@
                     @endforeach
                 </div>
             </div>
+
+            <button
+                type="button"
+                wire:click="toggleOrder"
+                class="inline-flex items-center justify-center w-8 h-8 text-gray-600 border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
+                title="{{ $order === 'asc' ? 'Mais antigos primeiro (clique para inverter)' : 'Mais recentes primeiro (clique para inverter)' }}"
+                aria-label="Inverter a ordem cronológica"
+            >
+                <svg class="w-4 h-4 transition-transform {{ $order === 'desc' ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9M3 12h5m6 4 4 4m0 0 4-4m-4 4V8" />
+                </svg>
+            </button>
         </div>
     </div>
 
