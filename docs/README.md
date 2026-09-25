@@ -21,7 +21,7 @@ Implemente uma fase por vez, na ordem descrita em [`12-roadmap-e-fases.md`](./12
 - [x] [08 — Relatórios e Exportação](./08-relatorios-exportacao.md) — geração de PDF e Excel por período.
 - [x] [09 — Gráficos e Dashboard](./09-graficos-dashboard.md) — visualizações comparativas.
 - [x] [10 — PWA e Notificações](./10-pwa-notificacoes.md) — instalabilidade e lembretes via Web Push.
-- [ ] [11 — Deploy em Produção](./11-deploy-producao.md) — publicação em servidor **sem Docker**.
+- [ ] [11 — Deploy em Produção](./11-deploy-producao.md) — publicação em servidor **sem Docker** (Hostoo via GitHub — em andamento).
 - [x] [12 — Roadmap e Fases](./12-roadmap-e-fases.md) — ordem de execução, Definition of Done, riscos, backlog.
 - [x] [13 — Compartilhamento com a Psicóloga](./13-compartilhamento-psicologa.md) — link com PIN, somente leitura, histórico de acessos.
 
