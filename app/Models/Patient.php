@@ -65,6 +65,29 @@ class Patient extends Model
         return $this->birth_date?->age;
     }
 
+    /**
+     * Iniciais do nome (primeiro + último nome, ex.: "Paciente Souza Dev" →
+     * "P. D."), usadas na visão compartilhada com a psicóloga (docs/13) para
+     * não expor o nome completo do paciente na tela.
+     */
+    public function getInitialsAttribute(): string
+    {
+        $parts = array_values(array_filter(preg_split('/\s+/', trim($this->full_name))));
+
+        if (count($parts) === 0) {
+            return '';
+        }
+
+        if (count($parts) === 1) {
+            return mb_strtoupper(mb_substr($parts[0], 0, 1)).'.';
+        }
+
+        $first = mb_strtoupper(mb_substr(reset($parts), 0, 1));
+        $last = mb_strtoupper(mb_substr(end($parts), 0, 1));
+
+        return "{$first}. {$last}.";
+    }
+
     public function isProfileComplete(): bool
     {
         return filled($this->full_name) && filled($this->birth_date);

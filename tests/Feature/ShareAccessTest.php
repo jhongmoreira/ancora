@@ -45,7 +45,8 @@ test('correct pin grants access to the dashboard and history', function () {
 
     $this->get(route('share.dashboard', $this->link->token))
         ->assertOk()
-        ->assertSee('Fulano de Tal');
+        ->assertSee('F. T.')
+        ->assertDontSee('Fulano de Tal');
 
     $this->get(route('share.history', $this->link->token))
         ->assertOk()
