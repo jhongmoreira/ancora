@@ -37,7 +37,7 @@
                     <p class="text-sm text-gray-500">
                         Dados de <span class="font-medium text-gray-800">{{ $patient->initials }}</span>
                         @isset($expiresAt)
-                            <span class="text-gray-400"> · este acesso expira em {{ $expiresAt->format('d/m/Y \à\s H:i') }}</span>
+                            <span class="font-bold text-red-600"> · este acesso expira em {{ $expiresAt->format('d/m/Y \à\s H:i') }}</span>
                         @endisset
                     </p>
                 </div>
