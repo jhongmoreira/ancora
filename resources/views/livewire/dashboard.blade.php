@@ -1,6 +1,6 @@
 <div>
     <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div class="flex flex-wrap items-end gap-4">
+        <div class="flex flex-wrap items-center gap-4">
             <div>
                 <label class="block text-xs font-medium text-gray-500 mb-1">Período</label>
                 <select wire:model.live="period" class="text-sm border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
@@ -11,25 +11,22 @@
                 </select>
             </div>
 
-            <div>
-                <span class="block text-xs mb-1 invisible" aria-hidden="true">.</span>
-                <div class="flex items-center gap-2">
-                    <span
-                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 text-xs font-medium"
-                        title="Dias com pelo menos um registro no período selecionado"
-                    >
-                        📅 {{ $consistency['daysWithLogs'] }}/{{ $consistency['totalDays'] }} dias
-                    </span>
+            <div class="flex items-center gap-2">
+                <span
+                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 text-xs font-medium"
+                    title="Dias com pelo menos um registro no período selecionado"
+                >
+                    📅 {{ $consistency['daysWithLogs'] }}/{{ $consistency['totalDays'] }} dias
+                </span>
 
-                    @if ($streak['current'] > 0)
-                        <span
-                            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-orange-50 text-orange-700 text-xs font-medium"
-                            title="Dias seguidos registrando (sequência atual)"
-                        >
-                            🔥 {{ $streak['current'] }} {{ Str::plural('dia', $streak['current']) }} seguido{{ $streak['current'] > 1 ? 's' : '' }}
-                        </span>
-                    @endif
-                </div>
+                @if ($streak['current'] > 0)
+                    <span
+                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-orange-50 text-orange-700 text-xs font-medium"
+                        title="Dias seguidos registrando (sequência atual)"
+                    >
+                        🔥 {{ $streak['current'] }} {{ Str::plural('dia', $streak['current']) }} seguido{{ $streak['current'] > 1 ? 's' : '' }}
+                    </span>
+                @endif
             </div>
         </div>
 
