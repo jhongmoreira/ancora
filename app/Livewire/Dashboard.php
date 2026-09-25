@@ -137,6 +137,37 @@ class Dashboard extends Component
         ];
     }
 
+    /**
+     * Sequência atual de dias seguidos com pelo menos um registro — olha
+     * todo o histórico do paciente (não só o período do filtro), já que
+     * "streak" é uma medida contínua, não recortada por período. Se hoje
+     * ainda não tem registro, começa a contar de ontem (o dia não acabou,
+     * então a sequência não é considerada quebrada ainda).
+     */
+    public function streakData(): array
+    {
+        $logDates = $this->patient
+            ->emotionLogs()
+            ->pluck('occurred_at')
+            ->map(fn ($dt) => $dt->toDateString())
+            ->unique();
+
+        $cursor = today();
+
+        if (! $logDates->contains($cursor->toDateString())) {
+            $cursor = $cursor->copy()->subDay();
+        }
+
+        $streak = 0;
+
+        while ($logDates->contains($cursor->toDateString())) {
+            $streak++;
+            $cursor = $cursor->copy()->subDay();
+        }
+
+        return ['current' => $streak];
+    }
+
     protected const PERIODS_OF_DAY = [
         'Manhã' => [0, 11],
         'Tarde' => [12, 17],
@@ -193,6 +224,7 @@ class Dashboard extends Component
         return view('livewire.dashboard', [
             'chartData' => $this->chartData(),
             'consistency' => $this->consistencyData(),
+            'streak' => $this->streakData(),
             'heatmap' => $this->heatmapData(),
         ]);
     }

@@ -85,6 +85,55 @@ test('consistency counts distinct days with at least one log', function () {
         ->and($consistency['totalDays'])->toBe(30);
 });
 
+test('streak counts consecutive days ending today', function () {
+    $mood = MoodCategory::first();
+
+    foreach ([now(), now()->subDay(), now()->subDays(2), now()->subDays(5)] as $when) {
+        $this->user->patient->emotionLogs()->create([
+            'mood_category_id' => $mood->id,
+            'occurred_at' => $when,
+            'situation' => 'S',
+            'action' => 'A',
+        ]);
+    }
+
+    $component = Livewire::actingAs($this->user)->test(Dashboard::class);
+
+    expect($component->instance()->streakData()['current'])->toBe(3);
+});
+
+test('streak keeps counting yesterday even if today has no log yet', function () {
+    $mood = MoodCategory::first();
+
+    foreach ([now()->subDay(), now()->subDays(2)] as $when) {
+        $this->user->patient->emotionLogs()->create([
+            'mood_category_id' => $mood->id,
+            'occurred_at' => $when,
+            'situation' => 'S',
+            'action' => 'A',
+        ]);
+    }
+
+    $component = Livewire::actingAs($this->user)->test(Dashboard::class);
+
+    expect($component->instance()->streakData()['current'])->toBe(2);
+});
+
+test('streak is zero when there is a gap before today and yesterday', function () {
+    $mood = MoodCategory::first();
+
+    $this->user->patient->emotionLogs()->create([
+        'mood_category_id' => $mood->id,
+        'occurred_at' => now()->subDays(3),
+        'situation' => 'S',
+        'action' => 'A',
+    ]);
+
+    $component = Livewire::actingAs($this->user)->test(Dashboard::class);
+
+    expect($component->instance()->streakData()['current'])->toBe(0);
+});
+
 test('heatmap only counts negative mood logs bucketed by weekday and period of day', function () {
     $negative = MoodCategory::where('key', 'negativo')->first();
     $positive = MoodCategory::where('key', 'positivo')->first();

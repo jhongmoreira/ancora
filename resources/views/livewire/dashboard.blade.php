@@ -1,13 +1,36 @@
 <div>
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <label class="block text-xs font-medium text-gray-500 mb-1">Período</label>
-            <select wire:model.live="period" class="text-sm border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                <option value="7d">Últimos 7 dias</option>
-                <option value="15d">Última quinzena</option>
-                <option value="30d">Últimos 30 dias</option>
-                <option value="month">Este mês</option>
-            </select>
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div class="flex flex-wrap items-end gap-4">
+            <div>
+                <label class="block text-xs font-medium text-gray-500 mb-1">Período</label>
+                <select wire:model.live="period" class="text-sm border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <option value="7d">Últimos 7 dias</option>
+                    <option value="15d">Última quinzena</option>
+                    <option value="30d">Últimos 30 dias</option>
+                    <option value="month">Este mês</option>
+                </select>
+            </div>
+
+            <div>
+                <span class="block text-xs mb-1 invisible" aria-hidden="true">.</span>
+                <div class="flex items-center gap-2">
+                    <span
+                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 text-xs font-medium"
+                        title="Dias com pelo menos um registro no período selecionado"
+                    >
+                        📅 {{ $consistency['daysWithLogs'] }}/{{ $consistency['totalDays'] }} dias
+                    </span>
+
+                    @if ($streak['current'] > 0)
+                        <span
+                            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-orange-50 text-orange-700 text-xs font-medium"
+                            title="Dias seguidos registrando (sequência atual)"
+                        >
+                            🔥 {{ $streak['current'] }} {{ Str::plural('dia', $streak['current']) }} seguido{{ $streak['current'] > 1 ? 's' : '' }}
+                        </span>
+                    @endif
+                </div>
+            </div>
         </div>
 
         @unless ($readOnly)
@@ -25,19 +48,6 @@
             @endunless
         </div>
     @endif
-
-    <div class="bg-white shadow sm:rounded-lg p-4 sm:p-6 mb-6">
-        <h3 class="text-sm font-semibold text-gray-700 mb-2">Consistência de registro</h3>
-        <p class="text-sm text-gray-600 mb-2">
-            <span class="font-semibold text-gray-800">{{ $consistency['daysWithLogs'] }}</span>
-            de <span class="font-semibold text-gray-800">{{ $consistency['totalDays'] }}</span>
-            dia(s) do período com pelo menos um registro
-            <span class="text-gray-400">({{ $consistency['percentage'] }}%)</span>
-        </p>
-        <div class="w-full bg-gray-100 rounded-full h-2">
-            <div class="bg-indigo-600 h-2 rounded-full" style="width: {{ $consistency['percentage'] }}%"></div>
-        </div>
-    </div>
 
     <div wire:ignore x-data="ancoraDashboard(@js($chartData))" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-white shadow sm:rounded-lg p-4 sm:p-6 lg:col-span-2">
