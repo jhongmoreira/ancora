@@ -16,6 +16,9 @@ Route::view('meus-dados', 'patient')
 // exigem o onboarding completo do paciente — ver docs/05.
 Route::middleware(['auth', 'onboarded'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
+
+    Route::view('registros/novo', 'emotion-logs.create')->name('emotion-logs.create');
+    Route::view('registros', 'emotion-logs.index')->name('emotion-logs.index');
 });
 
 require __DIR__.'/auth.php';
