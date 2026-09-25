@@ -34,24 +34,35 @@ CRUD simples sobre `Reminder`: adicionar horário (time picker), rótulo opciona
 
 ```php
 $now = now();
-$reminders = Reminder::where('is_active', true)
-    ->whereTime('time', '>=', $now->copy()->subMinutes(15)->format('H:i:s'))
-    ->whereTime('time', '<=', $now->format('H:i:s'))
-    ->get();
+// Filtra "está no horário?" em PHP (não em SQL) para lidar com a janela de
+// tolerância cruzando a meia-noite — volume mínimo, sem custo real.
+$reminders = Reminder::where('is_active', true)->get()
+    ->filter(fn ($r) => $isDue($r, $now));
 
 foreach ($reminders as $reminder) {
-    $created = ReminderDispatchLog::firstOrCreate([
-        'reminder_id' => $reminder->id,
-        'sent_date' => $now->toDateString(),
-    ], ['sent_at' => $now]);
+    $alreadySent = ReminderDispatchLog::where('reminder_id', $reminder->id)
+        ->whereDate('sent_date', $now->toDateString())
+        ->exists();
 
-    if ($created->wasRecentlyCreated) {
-        $reminder->patient->user->notify(new EmotionLogReminder($reminder));
+    if ($alreadySent) {
+        continue;
     }
+
+    try {
+        ReminderDispatchLog::create([
+            'reminder_id' => $reminder->id,
+            'sent_date' => $now->toDateString(),
+            'sent_at' => $now,
+        ]);
+    } catch (\Illuminate\Database\UniqueConstraintViolationException) {
+        continue; // outra execução concorrente já registrou o envio de hoje
+    }
+
+    $reminder->patient->user->notify(new EmotionLogReminder($reminder));
 }
 ```
 
-A janela de tolerância de 15 minutos cobre atrasos do cron; a constraint única em `reminder_dispatch_logs` (doc 02) garante que, mesmo rodando o comando mais de uma vez no mesmo minuto/janela, o envio não duplica.
+A janela de tolerância de 15 minutos cobre atrasos do cron; a constraint única em `reminder_dispatch_logs` (doc 02) é a garantia final de idempotência — o `exists()` prévio evita a maioria das duplicatas, e o `catch` cobre a corrida rara de duas execuções simultâneas. **Nota de implementação:** usar `firstOrCreate(['sent_date' => ...])` diretamente é arriscado porque o cast `date` do Eloquent pode serializar o valor com componente de hora dependendo do driver do banco, fazendo a busca não encontrar um registro que na verdade já existe (e violar a constraint única na tentativa de criar de novo) — por isso a checagem usa `whereDate()`, que normaliza a comparação independentemente do formato de armazenamento.
 
 ## 7. Scheduler + cron do sistema
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\PushSubscriptionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route(auth()->check() ? 'dashboard' : 'login'));
@@ -24,6 +25,13 @@ Route::middleware(['auth', 'onboarded'])->group(function () {
     Route::view('relatorios', 'reports.index')->name('reports.index');
     Route::get('relatorios/pdf', [ExportController::class, 'pdf'])->name('reports.pdf');
     Route::get('relatorios/excel', [ExportController::class, 'excel'])->name('reports.excel');
+
+    Route::view('lembretes', 'reminders.index')->name('reminders.index');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::post('push-subscriptions', [PushSubscriptionController::class, 'store'])->name('push-subscriptions.store');
+    Route::delete('push-subscriptions', [PushSubscriptionController::class, 'destroy'])->name('push-subscriptions.destroy');
 });
 
 require __DIR__.'/auth.php';

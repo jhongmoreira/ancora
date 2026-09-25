@@ -1,5 +1,100 @@
 import { Chart } from 'chart.js/auto';
 
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch((error) => {
+            console.error('Falha ao registrar o service worker do Âncora:', error);
+        });
+    });
+}
+
+function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+
+    return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+}
+
+document.addEventListener('alpine:init', () => {
+    Alpine.data('ancoraPushSubscription', () => ({
+        supported: 'serviceWorker' in navigator && 'PushManager' in window,
+        permission: typeof Notification !== 'undefined' ? Notification.permission : 'denied',
+        subscribed: false,
+        loading: false,
+
+        async init() {
+            if (!this.supported) {
+                return;
+            }
+
+            const registration = await navigator.serviceWorker.ready;
+            const subscription = await registration.pushManager.getSubscription();
+            this.subscribed = subscription !== null;
+        },
+
+        async subscribe() {
+            this.loading = true;
+
+            try {
+                const permission = await Notification.requestPermission();
+                this.permission = permission;
+
+                if (permission !== 'granted') {
+                    return;
+                }
+
+                const registration = await navigator.serviceWorker.ready;
+                const vapidKey = document.querySelector('meta[name="vapid-public-key"]').content;
+
+                const subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(vapidKey),
+                });
+
+                await fetch('/push-subscriptions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                    body: JSON.stringify(subscription.toJSON()),
+                });
+
+                this.subscribed = true;
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async unsubscribe() {
+            this.loading = true;
+
+            try {
+                const registration = await navigator.serviceWorker.ready;
+                const subscription = await registration.pushManager.getSubscription();
+
+                if (subscription) {
+                    await fetch('/push-subscriptions', {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        },
+                        body: JSON.stringify({ endpoint: subscription.endpoint }),
+                    });
+
+                    await subscription.unsubscribe();
+                }
+
+                this.subscribed = false;
+            } finally {
+                this.loading = false;
+            }
+        },
+    }));
+});
+
 document.addEventListener('alpine:init', () => {
     Alpine.data('ancoraDashboard', (initial) => ({
         charts: {},
