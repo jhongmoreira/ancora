@@ -7,11 +7,12 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
-        <link rel="manifest" href="/manifest.json">
+        <link rel="manifest" href="{{ asset('manifest.json') }}">
         <meta name="theme-color" content="#4f46e5">
+        <meta name="app-base-url" content="{{ url('/') }}">
         <meta name="vapid-public-key" content="{{ config('webpush.vapid.public_key') }}">
-        <link rel="icon" href="/icons/icon-192.png">
-        <link rel="apple-touch-icon" href="/icons/icon-192.png">
+        <link rel="icon" href="{{ asset('icons/icon-192.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('icons/icon-192.png') }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

@@ -1,8 +1,11 @@
 import { Chart } from 'chart.js/auto';
 
+// Base da URL do app (respeita deploys em subpasta, ex.: /ancoraweb/public).
+const appBaseUrl = (document.querySelector('meta[name="app-base-url"]')?.content ?? '').replace(/\/$/, '');
+
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch((error) => {
+        navigator.serviceWorker.register(`${appBaseUrl}/sw.js`, { scope: `${appBaseUrl}/` }).catch((error) => {
             console.error('Falha ao registrar o service worker do Âncora:', error);
         });
     });

@@ -7,10 +7,11 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
-        <link rel="manifest" href="/manifest.json">
+        <link rel="manifest" href="{{ asset('manifest.json') }}">
         <meta name="theme-color" content="#4f46e5">
-        <link rel="icon" href="/icons/icon-192.png">
-        <link rel="apple-touch-icon" href="/icons/icon-192.png">
+        <meta name="app-base-url" content="{{ url('/') }}">
+        <link rel="icon" href="{{ asset('icons/icon-192.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('icons/icon-192.png') }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -22,7 +23,7 @@
     <body class="font-sans text-gray-900 antialiased">
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
             <div>
-                <a href="/" wire:navigate>
+                <a href="{{ url('/') }}" wire:navigate>
                     <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
                 </a>
             </div>
