@@ -59,6 +59,23 @@ test('filters by mood category', function () {
         ->assertDontSee('Registro negativo');
 });
 
+test('toggling a mood filter twice returns to no filter without error', function () {
+    $mood = MoodCategory::first();
+
+    Livewire::actingAs($this->user)
+        ->test(History::class)
+        ->call('toggleMood', $mood->id)
+        ->assertSet('mood', [$mood->id])
+        ->call('toggleMood', $mood->id)
+        ->assertSet('mood', []);
+});
+
+test('visiting the history page with a stale malformed mood query string does not crash', function () {
+    $this->actingAs($this->user)
+        ->get(route('emotion-logs.index', ['mood' => 'false']))
+        ->assertOk();
+});
+
 test('can delete a log after confirming', function () {
     $log = createLog($this->user, 'positivo', now());
 

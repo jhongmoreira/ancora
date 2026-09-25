@@ -28,7 +28,7 @@
                     @foreach ($this->moodCategories as $category)
                         <button
                             type="button"
-                            wire:click="$toggle('mood', {{ $category->id }})"
+                            wire:click="toggleMood({{ $category->id }})"
                             @class([
                                 'px-2 py-1 text-xs rounded-full border',
                                 'border-indigo-600 bg-indigo-50 text-indigo-700' => in_array($category->id, $mood),

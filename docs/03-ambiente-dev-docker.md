@@ -115,7 +115,13 @@ docker compose logs -f app
 docker compose exec db mysql -u ancora -p ancora
 ```
 
-## 9. Troubleshooting
+## 9. Assets (Tailwind/Vite) durante o desenvolvimento
+
+Prefira manter `npm run dev` (watch mode) rodando em background durante o desenvolvimento, em vez de `npm run build` avulso. O Tailwind só gera no CSS final as classes que existem nos arquivos Blade **no momento do build** — criar uma view nova com classes novas depois de um `npm run build` deixa essa view sem estilo (os elementos existem no HTML, mas sem nenhum CSS aplicado, o que pode parecer "o botão sumiu"). Com `npm run dev`, o Vite observa os arquivos e recompila automaticamente.
+
+Antes de encerrar a sessão de dev ou fazer deploy, rode `npm run build` uma vez — isso também remove o arquivo `public/hot` que o `npm run dev` cria; se esse arquivo ficar para trás sem o servidor Vite rodando, o Laravel tenta carregar os assets de `127.0.0.1:5173` e a página quebra.
+
+## 10. Troubleshooting
 
 - **Permissões de `storage/` e `bootstrap/cache/`**: se o container rodar como usuário diferente do host, ajustar `chmod -R 775` ou mapear UID/GID no Dockerfile.
 - **MySQL não sobe a tempo do `migrate`**: usar `depends_on` com `condition: service_healthy` no compose, com healthcheck no serviço `db`.

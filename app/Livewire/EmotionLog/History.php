@@ -23,18 +23,26 @@ class History extends Component
     #[Url]
     public ?string $to = null;
 
-    /** @var array<int> */
+    /**
+     * Sem tipo declarado de propósito: uma URL antiga/malformada (ex.:
+     * `?mood=false`) não pode travar a hidratação do componente com um
+     * TypeError. Normalizamos para array em mount().
+     *
+     * @var array<int>
+     */
     #[Url]
-    public array $mood = [];
+    public $mood = [];
 
     /** @var array<int> */
     #[Url]
-    public array $feelings = [];
+    public $feelings = [];
 
     public ?int $confirmingDeleteId = null;
 
     public function mount(): void
     {
+        $this->mood = is_array($this->mood) ? array_map('intval', $this->mood) : [];
+        $this->feelings = is_array($this->feelings) ? array_map('intval', $this->feelings) : [];
         $this->applyPeriodPreset($this->period);
     }
 
@@ -63,6 +71,17 @@ class History extends Component
 
     public function updatedFeelings(): void
     {
+        $this->resetPage();
+    }
+
+    public function toggleMood(int $moodCategoryId): void
+    {
+        $current = is_array($this->mood) ? $this->mood : [];
+
+        $this->mood = in_array($moodCategoryId, $current, true)
+            ? array_values(array_diff($current, [$moodCategoryId]))
+            : [...$current, $moodCategoryId];
+
         $this->resetPage();
     }
 
