@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Concerns\GuardsSharedAccess;
 use App\Models\MoodCategory;
 use App\Models\Patient;
 use Carbon\Carbon;
@@ -9,10 +10,13 @@ use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 class Dashboard extends Component
 {
+    use GuardsSharedAccess;
+
     protected const COLORS = [
         'green' => '#16a34a',
         'gray' => '#6b7280',
@@ -21,6 +25,7 @@ class Dashboard extends Component
 
     public ?Patient $patient = null;
 
+    #[Locked]
     public bool $readOnly = false;
 
     public string $period = '15d';
@@ -35,10 +40,11 @@ class Dashboard extends Component
      *                                 (com $readOnly=true) na visão compartilhada com a
      *                                 psicóloga (ver ShareLink).
      */
-    public function mount(?Patient $patient = null, bool $readOnly = false): void
+    public function mount(?Patient $patient = null, bool $readOnly = false, ?string $shareToken = null): void
     {
         $this->patient = $patient ?? Auth::user()?->patient;
         $this->readOnly = $readOnly;
+        $this->shareToken = $shareToken;
         $this->applyPeriodPreset($this->period);
     }
 

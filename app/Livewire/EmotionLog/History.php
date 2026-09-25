@@ -2,21 +2,25 @@
 
 namespace App\Livewire\EmotionLog;
 
+use App\Livewire\Concerns\GuardsSharedAccess;
 use App\Models\Feeling;
 use App\Models\MoodCategory;
 use App\Models\Patient;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class History extends Component
 {
+    use GuardsSharedAccess;
     use WithPagination;
 
     public ?Patient $patient = null;
 
+    #[Locked]
     public bool $readOnly = false;
 
     #[Url]
@@ -54,10 +58,11 @@ class History extends Component
      *                                 (com $readOnly=true) na visão compartilhada com a
      *                                 psicóloga (ver ShareLink).
      */
-    public function mount(?Patient $patient = null, bool $readOnly = false): void
+    public function mount(?Patient $patient = null, bool $readOnly = false, ?string $shareToken = null): void
     {
         $this->patient = $patient ?? Auth::user()?->patient;
         $this->readOnly = $readOnly;
+        $this->shareToken = $shareToken;
         $this->mood = is_array($this->mood) ? array_map('intval', $this->mood) : [];
         $this->feelings = is_array($this->feelings) ? array_map('intval', $this->feelings) : [];
         $this->order = $this->order === 'desc' ? 'desc' : 'asc';

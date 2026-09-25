@@ -118,3 +118,54 @@ test('regenerating the link invalidates the old token immediately', function () 
         ->assertOk()
         ->assertSee('inválido');
 });
+
+test('open shared views stop returning data after the link is revoked', function (string $component) {
+    $this->post(route('share.verify', $this->link->token), ['pin' => $this->pin]);
+
+    $view = \Livewire\Livewire::test($component, [
+        'patient' => $this->user->patient,
+        'readOnly' => true,
+        'shareToken' => $this->link->token,
+    ]);
+
+    $view->set('period', '7d')->assertNoRedirect();
+
+    app(ShareLinkService::class)->revoke($this->user->patient);
+
+    $view->set('period', '30d')
+        ->assertRedirect(route('share.pin', $this->link->token));
+
+    expect($view->effects)->not->toHaveKey('html')
+        ->and($view->instance()->patient->exists)->toBeFalse();
+})->with([
+    'dashboard' => \App\Livewire\Dashboard::class,
+    'history' => \App\Livewire\EmotionLog\History::class,
+]);
+
+test('open shared views stop returning data after the link expires', function () {
+    $this->post(route('share.verify', $this->link->token), ['pin' => $this->pin]);
+
+    $view = \Livewire\Livewire::test(\App\Livewire\EmotionLog\History::class, [
+        'patient' => $this->user->patient,
+        'readOnly' => true,
+        'shareToken' => $this->link->token,
+    ])->assertSee('Situação sigilosa do paciente');
+
+    $this->link->update(['expires_at' => now()->subMinute()]);
+
+    $view->call('toggleOrder')
+        ->assertRedirect(route('share.pin', $this->link->token));
+
+    expect($view->effects)->not->toHaveKey('html')
+        ->and($view->instance()->patient->exists)->toBeFalse();
+});
+
+test('shared views cannot be switched out of read only mode', function () {
+    $this->post(route('share.verify', $this->link->token), ['pin' => $this->pin]);
+
+    \Livewire\Livewire::test(\App\Livewire\EmotionLog\History::class, [
+        'patient' => $this->user->patient,
+        'readOnly' => true,
+        'shareToken' => $this->link->token,
+    ])->set('readOnly', false);
+})->throws(\Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException::class);
