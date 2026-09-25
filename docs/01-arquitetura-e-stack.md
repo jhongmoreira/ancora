@@ -4,7 +4,7 @@
 
 | Camada | Escolha | Por quê |
 |---|---|---|
-| Backend | Laravel 12 (PHP 8.2+) | Framework maduro, produtivo, com tudo que o app precisa (auth, ORM, scheduler, notifications) sem infraestrutura extra. |
+| Backend | Laravel 13 (PHP 8.4+) | Framework maduro, produtivo, com tudo que o app precisa (auth, ORM, scheduler, notifications) sem infraestrutura extra. |
 | Frontend | Blade + Livewire 3 + Alpine.js | Interatividade (wizard de registro, filtros reativos) sem precisar de uma API JSON separada nem de um build SPA (React/Vue) — mantém tudo renderizado no servidor. |
 | Gráficos | Chart.js | Leve, sem dependência de framework JS, atende aos 3 gráficos pedidos. |
 | Banco | MySQL 8 | Definido pelo usuário. |
@@ -68,7 +68,7 @@ public/
   icons/
 routes/
   web.php
-  console.php                  # Scheduler (Laravel 12 não usa mais app/Console/Kernel.php)
+  console.php                  # Scheduler (Laravel 11+ não usa mais app/Console/Kernel.php)
 database/
   migrations/
   seeders/

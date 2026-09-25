@@ -55,7 +55,7 @@ A janela de tolerância de 15 minutos cobre atrasos do cron; a constraint única
 
 ## 7. Scheduler + cron do sistema
 
-Em `routes/console.php` (Laravel 12 não usa mais `app/Console/Kernel.php`):
+Em `routes/console.php` (Laravel 11+ não usa mais `app/Console/Kernel.php`):
 
 ```php
 Schedule::command('reminders:dispatch')->everyMinute();

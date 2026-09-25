@@ -13,7 +13,7 @@
 
 | Serviço | Imagem/base | Propósito |
 |---|---|---|
-| `app` | Dockerfile próprio (PHP-FPM 8.3) | Executa o Laravel (PHP-FPM), com extensões: `pdo_mysql`, `mbstring`, `bcmath`, `gd`, `intl`, `zip`, `exif`. |
+| `app` | Dockerfile próprio (PHP-FPM 8.4) | Executa o Laravel (PHP-FPM), com extensões: `pdo_mysql`, `mbstring`, `bcmath`, `gd`, `intl`, `zip`, `exif`. |
 | `webserver` | `nginx:alpine` | Serve a aplicação, proxy para `app:9000` via FastCGI. |
 | `db` | `mysql:8.0` | Banco de dados, com volume nomeado para persistir dados entre restarts. |
 | `adminer` | `adminer:latest` | Inspeção visual do banco em dev (mais leve que phpMyAdmin). |
@@ -22,7 +22,7 @@
 ## 3. Dockerfile do `app` (esqueleto)
 
 ```dockerfile
-FROM php:8.3-fpm
+FROM php:8.4-fpm
 
 RUN apt-get update && apt-get install -y \
     libzip-dev libpng-dev libicu-dev \

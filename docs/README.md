@@ -26,7 +26,7 @@ Implemente uma fase por vez, na ordem descrita em [`12-roadmap-e-fases.md`](./12
 
 ## Decisões-chave já fechadas
 
-- Stack: Laravel 12 + Blade + Livewire 3 + Alpine.js + MySQL.
+- Stack: Laravel 13 + Blade + Livewire 3 + Alpine.js + MySQL.
 - Docker é **exclusivo do ambiente de desenvolvimento**; produção roda em hospedagem tradicional (PHP-FPM/Apache ou Nginx + MySQL, sem containers).
 - Sem filas assíncronas obrigatórias (`QUEUE_CONNECTION=sync`); sessão/cache em MySQL.
 - Registro emocional tem os campos: humor (+ intensidade opcional), sentimento(s), situação, ação, pensamento automático (opcional).

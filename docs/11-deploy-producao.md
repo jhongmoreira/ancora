@@ -4,7 +4,7 @@
 
 ## 1. Requisitos do servidor
 
-- PHP 8.2 ou 8.3, com extensões: `openssl`, `pdo_mysql`, `mbstring`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`, `fileinfo`, `gd`, `intl`, `zip`.
+- PHP 8.4 (exigido pelo Laravel 13/Symfony atual), com extensões: `openssl`, `pdo_mysql`, `mbstring`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`, `fileinfo`, `gd`, `intl`, `zip`.
 - MySQL 8 ou MariaDB compatível.
 - Composer disponível no servidor (ou build local + upload de `vendor/` via deploy, caso o host não permita `composer install`).
 - Acesso a cron do sistema (obrigatório para o Scheduler).
