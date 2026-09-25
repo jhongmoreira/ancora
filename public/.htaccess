@@ -1,3 +1,11 @@
+# Força PHP 8.4 nesta hospedagem (Hostoo/cPanel+LiteSpeed): o painel não
+# aplicava a versão configurada a este (sub)domínio — ver docs/11. Inofensivo
+# em outros ambientes (Nginx/Docker ignora .htaccess; outros Apache sem esse
+# handler registrado simplesmente ignoram a linha).
+<IfModule mime_module>
+    AddHandler application/x-httpd-ea-php84 .php
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes

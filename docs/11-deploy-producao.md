@@ -82,6 +82,14 @@ Laravel espera que o **document root do domínio seja a pasta `public/`** do pro
 - **O painel permite escolher a pasta pública do domínio/subdomínio**: aponte diretamente para `.../ancora/public`. Caminho mais limpo — usar sempre que disponível.
 - **O painel força o document root para `public_html/` (ou equivalente) e não permite trocar**: clonar o projeto FORA de `public_html` (ex.: `~/ancora`), copiar o **conteúdo** de `~/ancora/public/` para dentro de `public_html/`, e editar o `public_html/index.php` copiado para apontar os `require` para `~/ancora/vendor/autoload.php` e `~/ancora/bootstrap/app.php` (em vez dos caminhos relativos `__DIR__.'/../...'` originais, que assumiam estar *dentro* da estrutura do projeto). Esse `index.php` copiado precisa ser reaplicado a cada deploy (ou trocado por um symlink de `public_html` para `~/ancora/public`, se o Hostoo permitir symlinks).
 
+### 8.2 Lições do deploy real na Hostoo (cPanel + LiteSpeed)
+
+O painel da Hostoo não expõe nenhuma opção de document root (nem por domínio, nem por subdomínio depois de criado). O caminho que funcionou:
+
+1. **Criar um subdomínio dedicado** (ex.: `ancora.jgmoreira.com.br`) e, na tela de criação, apontar o campo "Diretório" direto para `ancoraweb/public` (dentro de `public_html`). Isso evita ter que reestruturar/mover a instalação.
+2. **O app precisa estar na raiz do (sub)domínio, não numa subpasta da URL.** Testamos rodar em `dominio.com/pasta/public` e o login quebrava: o próprio pacote **Livewire monta a URL do seu script e do endpoint `/livewire/update` como caminho absoluto começando com `/`**, ignorando `APP_URL` — isso não é configurável (não é um bug do nosso código, é assim que o pacote funciona) e só existe uma saída real: o app precisa responder na raiz de um domínio ou subdomínio (sem `/algumacoisa` na URL).
+3. **A versão do PHP selecionada no painel pode não valer pro (sub)domínio de verdade** — descobrimos isso vendo o erro `Composer detected issues in your platform: ... PHP version ">= 8.4.1"` mesmo com "PHP 8.4" marcado como selecionado na tela do painel. Confirmar sempre com um teste direto (`curl -s https://seu-dominio/algum-arquivo.php` retornando `<?php echo PHP_VERSION;`), não confiar só na tela do painel. Se a versão real divergir, forçar via `.htaccess` (ver `public/.htaccess` no repositório — bloco `AddHandler application/x-httpd-ea-php84 .php` no topo do arquivo).
+
 ## 9. Backup do banco
 
 Cron adicional (diário) rodando `mysqldump` para um arquivo com data, mantendo os últimos N dias e, idealmente, copiando para um local fora do próprio servidor (ex.: download manual periódico, ou upload para armazenamento externo do próprio usuário). Dado que são dados emocionais sensíveis e pessoais, perder o histórico seria o pior cenário de falha do projeto.
