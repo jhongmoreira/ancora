@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ExportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route(auth()->check() ? 'dashboard' : 'login'));
@@ -19,6 +20,10 @@ Route::middleware(['auth', 'onboarded'])->group(function () {
 
     Route::view('registros/novo', 'emotion-logs.create')->name('emotion-logs.create');
     Route::view('registros', 'emotion-logs.index')->name('emotion-logs.index');
+
+    Route::view('relatorios', 'reports.index')->name('reports.index');
+    Route::get('relatorios/pdf', [ExportController::class, 'pdf'])->name('reports.pdf');
+    Route::get('relatorios/excel', [ExportController::class, 'excel'])->name('reports.excel');
 });
 
 require __DIR__.'/auth.php';

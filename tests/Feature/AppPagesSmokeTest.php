@@ -19,4 +19,5 @@ test('main app pages render for an onboarded user', function (string $routeName)
     'patient.edit',
     'emotion-logs.create',
     'emotion-logs.index',
+    'reports.index',
 ]);

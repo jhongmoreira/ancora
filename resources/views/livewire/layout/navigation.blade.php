@@ -39,6 +39,9 @@ new class extends Component
                     <x-nav-link :href="route('emotion-logs.index')" :active="request()->routeIs('emotion-logs.index')" wire:navigate>
                         {{ __('Histórico') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.index')" wire:navigate>
+                        {{ __('Relatórios') }}
+                    </x-nav-link>
                     <x-nav-link :href="route('patient.edit')" :active="request()->routeIs('patient.edit')" wire:navigate>
                         {{ __('Meus dados') }}
                     </x-nav-link>
@@ -98,6 +101,9 @@ new class extends Component
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('emotion-logs.index')" :active="request()->routeIs('emotion-logs.index')" wire:navigate>
                 {{ __('Histórico') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.index')" wire:navigate>
+                {{ __('Relatórios') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('patient.edit')" :active="request()->routeIs('patient.edit')" wire:navigate>
                 {{ __('Meus dados') }}

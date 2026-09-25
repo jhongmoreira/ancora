@@ -18,13 +18,13 @@ Implemente uma fase por vez, na ordem descrita em [`12-roadmap-e-fases.md`](./12
 - [x] [05 — Cadastro de Paciente](./05-cadastro-paciente.md) — dados do paciente e da psicóloga vinculada.
 - [x] [06 — Registro Emocional](./06-registro-emocional.md) — o fluxo central do app (humor, sentimentos, situação, ação).
 - [x] [07 — Histórico e Filtros](./07-historico-filtros.md) — consulta dos registros passados.
-- [ ] [08 — Relatórios e Exportação](./08-relatorios-exportacao.md) — geração de PDF e Excel por período.
+- [x] [08 — Relatórios e Exportação](./08-relatorios-exportacao.md) — geração de PDF e Excel por período.
 - [x] [09 — Gráficos e Dashboard](./09-graficos-dashboard.md) — visualizações comparativas.
 - [ ] [10 — PWA e Notificações](./10-pwa-notificacoes.md) — instalabilidade e lembretes via Web Push.
 - [ ] [11 — Deploy em Produção](./11-deploy-producao.md) — publicação em servidor **sem Docker**.
 - [x] [12 — Roadmap e Fases](./12-roadmap-e-fases.md) — ordem de execução, Definition of Done, riscos, backlog.
 
-**Status atual: fases 1-7 do roadmap implementadas e testadas** (fundação, auth, modelo de dados, cadastro de paciente, registro emocional, histórico, gráficos/dashboard) — falta exportação PDF/Excel, PWA/push e deploy.
+**Status atual: fases 1-8 do roadmap implementadas e testadas** (fundação, auth, modelo de dados, cadastro de paciente, registro emocional, histórico, gráficos/dashboard, relatórios PDF/Excel) — falta PWA/push e deploy.
 
 ## Decisões-chave já fechadas
 
