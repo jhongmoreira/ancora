@@ -1,42 +1,56 @@
 <div>
-    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div class="flex flex-wrap items-end gap-4">
-            <div>
-                <label class="block text-xs font-medium text-gray-500 mb-1">Período</label>
-                <select wire:model.live="period" class="text-sm border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    <option value="7d">Últimos 7 dias</option>
-                    <option value="15d">Última quinzena</option>
-                    <option value="30d">Últimos 30 dias</option>
-                    <option value="month">Este mês</option>
-                </select>
-            </div>
+    <div class="bg-white shadow-sm sm:rounded-lg px-4 py-3 mb-6 flex flex-wrap items-center gap-3">
+        <label for="dashboard-period" class="sr-only">Período</label>
+        <select id="dashboard-period" wire:model.live="period" class="w-full sm:w-auto text-sm py-1.5 border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+            <option value="7d">Últimos 7 dias</option>
+            <option value="15d">Última quinzena</option>
+            <option value="30d">Últimos 30 dias</option>
+            <option value="month">Este mês</option>
+        </select>
 
-            <div>
-                <span class="block text-xs mb-1 invisible" aria-hidden="true">Período</span>
-                <div class="flex items-center gap-2 h-[38px]">
-                    <span
-                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 text-xs font-medium"
-                        title="Dias com pelo menos um registro no período selecionado"
-                    >
-                        📅 {{ $consistency['daysWithLogs'] }}/{{ $consistency['totalDays'] }} dias
-                    </span>
+        <div class="flex flex-wrap items-center gap-2">
+            <span
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-50 text-gray-700 ring-1 ring-inset ring-gray-200 text-xs font-medium"
+                title="Dias com pelo menos um registro no período selecionado"
+            >
+                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                </svg>
+                {{ $consistency['daysWithLogs'] }}/{{ $consistency['totalDays'] }} dias
+            </span>
 
-                    @if ($streak['current'] > 0)
-                        <span
-                            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-orange-50 text-orange-700 text-xs font-medium"
-                            title="Dias seguidos registrando (sequência atual)"
-                        >
-                            🔥 {{ $streak['current'] }} {{ Str::plural('dia', $streak['current']) }} seguido{{ $streak['current'] > 1 ? 's' : '' }}
-                        </span>
-                    @endif
-                </div>
-            </div>
+            @if ($streak['current'] > 0)
+                <span
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-50 text-orange-700 ring-1 ring-inset ring-orange-200 text-xs font-medium"
+                    title="Dias seguidos registrando (sequência atual)"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.047 8.287 8.287 0 0 0 9 9.601a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 0 0 .495-7.468 5.99 5.99 0 0 0-1.925 3.547 5.975 5.975 0 0 1-2.133-1.001A3.75 3.75 0 0 0 12 18Z" />
+                    </svg>
+                    {{ $streak['current'] }} {{ Str::plural('dia', $streak['current']) }} seguido{{ $streak['current'] > 1 ? 's' : '' }}
+                </span>
+            @endif
         </div>
 
         @unless ($readOnly)
-            <a href="{{ route('emotion-logs.create') }}" wire:navigate class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
-                Novo registro
-            </a>
+            {{-- No celular os botões vão para uma linha própria, com "Novo registro" ocupando a largura. --}}
+            <div class="flex w-full sm:w-auto sm:ms-auto items-center gap-2">
+                <a
+                    href="{{ route('compulsions.log') }}"
+                    wire:navigate
+                    class="inline-flex items-center justify-center w-9 h-9 flex-shrink-0 rounded-md border border-gray-300 text-gray-500 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition"
+                    title="Registrar compulsão"
+                    aria-label="Registrar compulsão"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
+                    </svg>
+                </a>
+                <a href="{{ route('emotion-logs.create') }}" wire:navigate class="flex-1 sm:flex-none inline-flex items-center justify-center h-9 px-4 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
+                    Novo registro
+                </a>
+            </div>
         @endunless
     </div>
 
