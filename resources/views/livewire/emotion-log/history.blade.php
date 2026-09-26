@@ -69,7 +69,7 @@
                         // Classes completas (não interpoladas) para o Tailwind detectá-las no build.
                         $moodStyle = [
                             'green' => ['card' => 'bg-green-50 border-green-500', 'tag' => 'bg-green-700 text-white'],
-                            'gray' => ['card' => 'bg-slate-100 border-slate-400', 'tag' => 'bg-slate-600 text-white'],
+                            'gray' => ['card' => 'bg-blue-50 border-blue-500', 'tag' => 'bg-blue-700 text-white'],
                             'red' => ['card' => 'bg-red-50 border-red-500', 'tag' => 'bg-red-700 text-white'],
                         ][$log->moodCategory->color] ?? ['card' => 'bg-white border-gray-400', 'tag' => 'bg-gray-600 text-white'];
                     @endphp

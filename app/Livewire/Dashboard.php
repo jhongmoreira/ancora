@@ -19,7 +19,7 @@ class Dashboard extends Component
 
     protected const COLORS = [
         'green' => '#16a34a',
-        'gray' => '#6b7280',
+        'gray' => '#2563eb',
         'red' => '#dc2626',
     ];
 
