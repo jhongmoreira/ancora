@@ -140,6 +140,7 @@ test('open shared views stop returning data after the link is revoked', function
 })->with([
     'dashboard' => \App\Livewire\Dashboard::class,
     'history' => \App\Livewire\EmotionLog\History::class,
+    'compulsions' => \App\Livewire\Compulsion\History::class,
 ]);
 
 test('open shared views stop returning data after the link expires', function () {

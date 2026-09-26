@@ -20,6 +20,8 @@ test('main app pages render for an onboarded user', function (string $routeName)
     'emotion-logs.create',
     'emotion-logs.index',
     'reports.index',
+    'compulsions.index',
+    'compulsions.log',
     'reminders.index',
     'share.manage',
 ]);
