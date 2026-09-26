@@ -42,6 +42,9 @@ new class extends Component
                     <x-nav-link :href="route('compulsions.index')" :active="request()->routeIs('compulsions.*')" wire:navigate>
                         {{ __('Compulsões') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('insights.index')" :active="request()->routeIs('insights.*')" wire:navigate>
+                        {{ __('Insights') }}
+                    </x-nav-link>
                     <x-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.index')" wire:navigate>
                         {{ __('Relatórios') }}
                     </x-nav-link>
@@ -113,6 +116,9 @@ new class extends Component
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('compulsions.index')" :active="request()->routeIs('compulsions.*')" wire:navigate>
                 {{ __('Compulsões') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('insights.index')" :active="request()->routeIs('insights.*')" wire:navigate>
+                {{ __('Insights') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.index')" wire:navigate>
                 {{ __('Relatórios') }}

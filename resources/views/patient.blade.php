@@ -10,6 +10,12 @@
             <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                 <livewire:patient-profile />
             </div>
+
+            @if (auth()->user()->patient?->isProfileComplete())
+                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                    <livewire:insights.consent />
+                </div>
+            @endif
         </div>
     </div>
 </x-app-layout>
