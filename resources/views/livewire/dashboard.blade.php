@@ -56,10 +56,10 @@
 
             <div class="bg-white shadow sm:rounded-lg p-4 sm:p-6">
                 <h3 class="text-sm font-semibold text-gray-700 mb-1">Palavras mais comuns nas situações</h3>
-                <p class="text-xs text-gray-400 mb-4">Termos que mais aparecem nas situações associadas a humor negativo — possíveis gatilhos recorrentes.</p>
+                <p class="text-xs text-gray-400 mb-4">Termos que mais aparecem nas situações associadas a humor desagradável — possíveis gatilhos recorrentes.</p>
 
                 @if (empty($triggers['words']))
-                    <p class="text-sm text-gray-400">Sem registros de humor negativo suficientes no período pra identificar padrões.</p>
+                    <p class="text-sm text-gray-400">Sem registros de humor desagradável suficientes no período pra identificar padrões.</p>
                 @else
                     <div class="flex flex-wrap gap-2">
                         @foreach ($triggers['words'] as $word => $count)
@@ -74,14 +74,14 @@
 
         <div class="bg-white shadow sm:rounded-lg p-4 sm:p-6 mb-6">
             <h3 class="text-sm font-semibold text-gray-700 mb-1">Velocidade de recuperação emocional</h3>
-            <p class="text-xs text-gray-400 mb-4">Tempo médio entre um registro de humor negativo e o próximo registro positivo ou neutro.</p>
+            <p class="text-xs text-gray-400 mb-4">Tempo médio entre um registro de humor desagradável e o próximo registro agradável ou neutro.</p>
 
             @if (is_null($recovery['average']))
                 <p class="text-sm text-gray-400">
                     @if ($recovery['analyzed'] === 0)
-                        Nenhum registro de humor negativo no período selecionado.
+                        Nenhum registro de humor desagradável no período selecionado.
                     @else
-                        Ainda não há um registro positivo/neutro depois do(s) {{ $recovery['analyzed'] }} registro(s) negativo(s) do período — pode levar um tempo pra aparecer.
+                        Ainda não há um registro agradável/neutro depois {{ $recovery['analyzed'] === 1 ? 'do registro desagradável' : 'dos '.$recovery['analyzed'].' registros desagradáveis' }} do período — pode levar um tempo pra aparecer.
                     @endif
                 </p>
             @else
@@ -89,7 +89,7 @@
                     {{ $this->formatRecoveryDuration($recovery['average']) }}
                 </p>
                 <p class="text-xs text-gray-400 mt-1">
-                    Média calculada sobre {{ $recovery['count'] }} {{ Str::plural('episódio', $recovery['count']) }} de humor negativo com recuperação identificada
+                    Média calculada sobre {{ $recovery['count'] }} {{ Str::plural('episódio', $recovery['count']) }} de humor desagradável com recuperação identificada
                     (de {{ $recovery['analyzed'] }} no período).
                 </p>
             @endif
@@ -114,11 +114,11 @@
     </div>
 
     <div class="bg-white shadow sm:rounded-lg p-4 sm:p-6 mt-6">
-        <h3 class="text-sm font-semibold text-gray-700 mb-1">Quando o humor negativo mais aparece</h3>
-        <p class="text-xs text-gray-400 mb-4">Concentração de registros de humor negativo por dia da semana e período do dia.</p>
+        <h3 class="text-sm font-semibold text-gray-700 mb-1">Quando o humor desagradável mais aparece</h3>
+        <p class="text-xs text-gray-400 mb-4">Concentração de registros de humor desagradável por dia da semana e período do dia.</p>
 
         @if ($heatmap['total'] === 0)
-            <p class="text-sm text-gray-400">Nenhum registro de humor negativo no período selecionado.</p>
+            <p class="text-sm text-gray-400">Nenhum registro de humor desagradável no período selecionado.</p>
         @else
             <div class="overflow-x-auto">
                 <table class="text-xs w-full">

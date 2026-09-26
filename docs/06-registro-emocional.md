@@ -11,9 +11,9 @@ Passo 1 — Humor                Passo 2 — Sentimentos          Passo 3 — Si
 ┌───────────────────┐          ┌───────────────────┐          ┌───────────────────┐
 │ Como você está?    │          │ O que você sentiu? │          │ O que aconteceu?   │
 │                    │          │ (multi-seleção)    │          │                    │
-│ [🙂 Positivo]      │          │ [Ansioso] [Alegre] │          │ [ textarea________]│
+│ [🙂 Agradável]     │          │ [Ansioso] [Alegre] │          │ [ textarea________]│
 │ [😐 Neutro]        │   -->    │ [Triste] [Surpreso]│   -->    │                    │
-│ [🙁 Negativo]      │          │ [Amoroso] ...      │          │       [Próximo]    │
+│ [🙁 Desagradável]  │          │ [Amoroso] ...      │          │       [Próximo]    │
 │                    │          │                    │          │                    │
 │ Intensidade (opc.) │          │       [Próximo]    │          │                    │
 │ [1 2 3 4 5]        │          │                    │          │                    │

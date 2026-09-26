@@ -7,8 +7,8 @@ Componente Livewire (`Livewire\EmotionLog\History`) que lista os registros do pa
 ## 2. Filtros reativos (Livewire)
 
 - **Período**: seletor de datas (predefinidos: últimos 7 dias, últimos 30 dias, este mês, personalizado com data inicial/final).
-- **Humor**: filtro multi-select por categoria (Positivo/Neutro/Negativo).
-- **Sentimento**: filtro multi-select pela lista de sentimentos (dependente do catálogo, não do humor selecionado — permite cruzar, ex.: "mostre registros negativos com o sentimento Ansioso").
+- **Humor**: filtro multi-select por categoria (Agradável/Neutro/Desagradável).
+- **Sentimento**: filtro multi-select pela lista de sentimentos (dependente do catálogo, não do humor selecionado — permite cruzar, ex.: "mostre registros desagradáveis com o sentimento Ansioso").
 
 Todos os filtros atualizam a lista via `wire:model.live` sem reload de página, com debounce nos campos de texto (se houver busca livre — opcional, fora do escopo mínimo).
 
