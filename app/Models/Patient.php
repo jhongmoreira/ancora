@@ -21,12 +21,14 @@ class Patient extends Model
         'gender',
         'contact',
         'notes',
+        'ai_consent_at',
     ];
 
     protected function casts(): array
     {
         return [
             'birth_date' => 'date',
+            'ai_consent_at' => 'datetime',
         ];
     }
 
@@ -53,6 +55,16 @@ class Patient extends Model
     public function compulsionLogs(): HasMany
     {
         return $this->hasMany(CompulsionLog::class);
+    }
+
+    public function insightReports(): HasMany
+    {
+        return $this->hasMany(InsightReport::class);
+    }
+
+    public function hasAiConsent(): bool
+    {
+        return $this->ai_consent_at !== null;
     }
 
     public function reminders(): HasMany

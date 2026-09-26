@@ -90,4 +90,11 @@ class ShareAccessController extends Controller
 
         return view('share.compulsions', ['patient' => $link->patient, 'token' => $token, 'expiresAt' => $link->expires_at]);
     }
+
+    public function insights(Request $request, string $token)
+    {
+        $link = $request->attributes->get('shareLink');
+
+        return view('share.insights', ['patient' => $link->patient, 'token' => $token, 'expiresAt' => $link->expires_at]);
+    }
 }

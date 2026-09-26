@@ -187,4 +187,5 @@ test('shared pages show the section title and highlight the open menu item', fun
     'dashboard' => ['share.dashboard', 'Dashboard', 'Dashboard'],
     'history' => ['share.history', 'Histórico', 'Histórico'],
     'compulsions' => ['share.compulsions', 'Mapa de compulsões', 'Compulsões'],
+    'insights' => ['share.insights', 'Insights', 'Insights'],
 ]);

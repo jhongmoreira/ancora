@@ -19,17 +19,22 @@
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {{-- No celular: marca na 1ª linha e links na 2ª, ambos centralizados. A partir de sm, tudo numa linha à esquerda. --}}
                     <div class="flex flex-wrap items-center gap-x-10 pt-3 sm:pt-0 sm:h-16">
-                        <span class="w-full sm:w-auto text-center sm:text-left font-semibold text-gray-800">Âncora</span>
+                        <div class="flex w-full sm:w-auto justify-center sm:justify-start">
+                            <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                        </div>
                         @isset($patient)
-                            <div class="flex w-full sm:w-auto justify-center sm:justify-start sm:self-stretch sm:-my-px gap-x-5 sm:gap-x-8">
-                                <x-nav-link :href="route('share.dashboard', $token)" :active="request()->routeIs('share.dashboard')" class="py-3 sm:py-0">
+                            <div class="flex w-full sm:w-auto [justify-content:safe_center] sm:justify-start overflow-x-auto sm:overflow-visible sm:self-stretch sm:-my-px gap-x-4 sm:gap-x-8">
+                                <x-nav-link :href="route('share.dashboard', $token)" :active="request()->routeIs('share.dashboard')" class="py-3 sm:py-0 whitespace-nowrap">
                                     Dashboard
                                 </x-nav-link>
-                                <x-nav-link :href="route('share.history', $token)" :active="request()->routeIs('share.history')" class="py-3 sm:py-0">
+                                <x-nav-link :href="route('share.history', $token)" :active="request()->routeIs('share.history')" class="py-3 sm:py-0 whitespace-nowrap">
                                     Histórico
                                 </x-nav-link>
-                                <x-nav-link :href="route('share.compulsions', $token)" :active="request()->routeIs('share.compulsions')" class="py-3 sm:py-0">
+                                <x-nav-link :href="route('share.compulsions', $token)" :active="request()->routeIs('share.compulsions')" class="py-3 sm:py-0 whitespace-nowrap">
                                     Compulsões
+                                </x-nav-link>
+                                <x-nav-link :href="route('share.insights', $token)" :active="request()->routeIs('share.insights')" class="py-3 sm:py-0 whitespace-nowrap">
+                                    Insights
                                 </x-nav-link>
                             </div>
                         @endisset
