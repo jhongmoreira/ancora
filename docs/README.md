@@ -25,6 +25,7 @@ Implemente uma fase por vez, na ordem descrita em [`12-roadmap-e-fases.md`](./12
 - [x] [12 — Roadmap e Fases](./12-roadmap-e-fases.md) — ordem de execução, Definition of Done, riscos, backlog.
 - [x] [13 — Compartilhamento com a Psicóloga](./13-compartilhamento-psicologa.md) — link com PIN, somente leitura, histórico de acessos.
 - [x] [14 — Mapa de Compulsões](./14-mapa-de-compulsoes.md) — registro de impulsos (cedeu/resistiu), sentimentos antes/depois, padrões para a psicóloga.
+- [x] [15 — Insights com IA](./15-insights-ia.md) — relatório da quinzena gerado com Gemini (TCC), visível para a psicóloga.
 
 **Status atual: fases 1-9 do roadmap + módulo de compartilhamento (doc 13) implementados e testados** (fundação, auth, modelo de dados, cadastro de paciente, registro emocional, histórico, gráficos/dashboard, relatórios PDF/Excel, PWA/push, compartilhamento com PIN) — falta apenas o deploy em produção (doc 11).
 

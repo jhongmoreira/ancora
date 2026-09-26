@@ -22,6 +22,7 @@ test('main app pages render for an onboarded user', function (string $routeName)
     'reports.index',
     'compulsions.index',
     'compulsions.log',
+    'insights.index',
     'reminders.index',
     'share.manage',
 ]);

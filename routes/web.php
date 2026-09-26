@@ -30,6 +30,8 @@ Route::middleware(['auth', 'onboarded'])->group(function () {
     Route::view('compulsoes', 'compulsions.index')->name('compulsions.index');
     Route::view('compulsoes/registrar', 'compulsions.log')->name('compulsions.log');
 
+    Route::view('insights', 'insights.index')->name('insights.index');
+
     Route::view('lembretes', 'reminders.index')->name('reminders.index');
 
     Route::view('compartilhar', 'share.manage')->name('share.manage');
@@ -50,6 +52,7 @@ Route::prefix('compartilhado/{token}')->group(function () {
         Route::get('/dashboard', [ShareAccessController::class, 'dashboard'])->name('share.dashboard');
         Route::get('/historico', [ShareAccessController::class, 'history'])->name('share.history');
         Route::get('/compulsoes', [ShareAccessController::class, 'compulsions'])->name('share.compulsions');
+        Route::get('/insights', [ShareAccessController::class, 'insights'])->name('share.insights');
     });
 });
 
