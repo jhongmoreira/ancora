@@ -59,7 +59,7 @@ Ver detalhamento em [`12-roadmap-e-fases.md`](./12-roadmap-e-fases.md), seção 
 
 ## 7. Glossário TCC (usado no app)
 
-- **Humor**: categoria ampla do estado emocional no momento (Positivo, Neutro, Negativo).
+- **Humor**: categoria ampla do estado emocional no momento (Agradável, Neutro, Desagradável).
 - **Sentimento**: emoção específica dentro de uma categoria de humor (ex.: ansioso, alegre, triste).
 - **Situação (gatilho)**: evento ou contexto que precedeu a emoção.
 - **Ação**: comportamento ou resposta do paciente diante da situação/emoção.
@@ -72,15 +72,17 @@ Ver detalhamento em [`12-roadmap-e-fases.md`](./12-roadmap-e-fases.md), seção 
 
 | Chave | Rótulo | Cor sugerida |
 |---|---|---|
-| `positivo` | Positivo | Verde suave |
+| `positivo` | Agradável | Verde suave |
 | `neutro` | Neutro | Cinza/azulado |
-| `negativo` | Negativo | Vermelho suave (evitar tom alarmante) |
+| `negativo` | Desagradável | Vermelho suave (evitar tom alarmante) |
+
+> As chaves internas continuam `positivo`/`negativo`; só os rótulos exibidos mudaram de "Positivo"/"Negativo" para "Agradável"/"Desagradável" (migration `rename_mood_category_labels_to_agradavel_desagradavel`), por soarem menos como um julgamento sobre a emoção.
 
 **Catálogo inicial de sentimentos por categoria** (seed, editável futuramente):
 
-- **Positivo**: Alegre, Grato, Amoroso, Animado, Orgulhoso, Aliviado, Confiante, Surpreso (positivamente)
+- **Agradável**: Alegre, Grato, Amoroso, Animado, Orgulhoso, Aliviado, Confiante, Surpreso (positivamente)
 - **Neutro**: Calmo, Indiferente, Pensativo, Cansado, Entediado
-- **Negativo**: Ansioso, Triste, Com raiva, Envergonhado, Culpado, Frustrado, Assustado, Sozinho, Surpreso (negativamente)
+- **Desagradável**: Ansioso, Triste, Com raiva, Envergonhado, Culpado, Frustrado, Assustado, Sozinho, Surpreso (negativamente)
 
 > Nota: "Surpreso" existe nas duas pontas porque surpresa é uma emoção neutra em valência até que o contexto a qualifique — replicado como dois itens distintos no catálogo para simplicidade (evita um mecanismo de "polaridade dependente do contexto").
 

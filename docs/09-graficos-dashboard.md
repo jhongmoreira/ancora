@@ -14,7 +14,7 @@ Gráfico de barras horizontais (ou pizza) mostrando a contagem de cada sentiment
 
 ## 4. Gráfico 3 — Distribuição por período (humor)
 
-Gráfico de pizza/rosca simples: proporção de registros Positivo / Neutro / Negativo no período selecionado.
+Gráfico de pizza/rosca simples: proporção de registros Agradável / Neutro / Desagradável no período selecionado.
 
 ## 5. Integração Chart.js + dados agregados
 

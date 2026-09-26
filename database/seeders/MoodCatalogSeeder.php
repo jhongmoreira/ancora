@@ -16,7 +16,7 @@ class MoodCatalogSeeder extends Seeder
         $catalog = [
             [
                 'key' => 'positivo',
-                'label' => 'Positivo',
+                'label' => 'Agradável',
                 'color' => 'green',
                 'order' => 1,
                 'feelings' => [
@@ -35,7 +35,7 @@ class MoodCatalogSeeder extends Seeder
             ],
             [
                 'key' => 'negativo',
-                'label' => 'Negativo',
+                'label' => 'Desagradável',
                 'color' => 'red',
                 'order' => 3,
                 'feelings' => [

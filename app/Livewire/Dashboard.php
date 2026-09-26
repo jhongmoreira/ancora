@@ -194,7 +194,7 @@ class Dashboard extends Component
     protected const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
     /**
-     * Concentração de registros de humor NEGATIVO por dia da semana x
+     * Concentração de registros de humor DESAGRADÁVEL (key `negativo`) por dia da semana x
      * período do dia — ajuda a identificar gatilhos recorrentes (ex.:
      * "segundas de manhã"), o tipo de padrão que vira assunto de sessão.
      */
@@ -254,7 +254,7 @@ class Dashboard extends Component
     ];
 
     /**
-     * Palavras mais recorrentes nas situações associadas a humor NEGATIVO —
+     * Palavras mais recorrentes nas situações associadas a humor DESAGRADÁVEL —
      * uma aproximação simples (contagem de palavras, sem NLP) de "gatilhos"
      * recorrentes, que é o tipo de padrão que a literatura de TCC destaca
      * como mais útil pra sessão (docs — pesquisa "Mood Charts in Therapy").
@@ -347,7 +347,7 @@ class Dashboard extends Component
         if ($peakCount > 0) {
             $dayPhrase = self::WEEKDAY_PHRASES[$peakDay] ?? $peakDay;
             $periodPhrase = self::PERIOD_PHRASES[$peakPeriod] ?? $peakPeriod;
-            $parts[] = "humor negativo concentrado às {$dayPhrase} {$periodPhrase}";
+            $parts[] = "humor desagradável concentrado às {$dayPhrase} {$periodPhrase}";
         }
 
         $sentences = [ucfirst(implode(', ', $parts)).'.'];
@@ -363,13 +363,13 @@ class Dashboard extends Component
     }
 
     /**
-     * Tempo médio entre um registro de humor NEGATIVO e o próximo registro
-     * positivo ou neutro — uma aproximação de "velocidade de recuperação
+     * Tempo médio entre um registro de humor DESAGRADÁVEL e o próximo registro
+     * agradável ou neutro — uma aproximação de "velocidade de recuperação
      * emocional", conceito central em terapia de regulação emocional/DBT.
      *
      * Olha além do `to` do período pra achar o "próximo" registro corretamente
      * mesmo quando ele cai logo depois da borda do filtro (evita subestimar
-     * a recuperação de episódios negativos perto do fim do período).
+     * a recuperação de episódios desagradáveis perto do fim do período).
      */
     public function recoveryData(): array
     {
