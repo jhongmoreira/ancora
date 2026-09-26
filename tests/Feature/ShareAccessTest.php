@@ -170,3 +170,21 @@ test('shared views cannot be switched out of read only mode', function () {
         'shareToken' => $this->link->token,
     ])->set('readOnly', false);
 })->throws(\Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException::class);
+
+test('shared pages show the section title and highlight the open menu item', function (string $route, string $title, string $menu) {
+    $this->post(route('share.verify', $this->link->token), ['pin' => $this->pin]);
+
+    $html = $this->get(route($route, $this->link->token))
+        ->assertOk()
+        ->assertSee("<h2 class=\"font-semibold text-xl text-gray-800 leading-tight\">{$title}</h2>", false)
+        ->getContent();
+
+    // Só o item da tela aberta recebe o sublinhado índigo do x-nav-link.
+    preg_match_all('#<a\b[^>]*border-indigo-400[^>]*>\s*([^<]+?)\s*</a>#', $html, $active);
+
+    expect($active[1])->toBe([$menu]);
+})->with([
+    'dashboard' => ['share.dashboard', 'Dashboard', 'Dashboard'],
+    'history' => ['share.history', 'Histórico', 'Histórico'],
+    'compulsions' => ['share.compulsions', 'Mapa de compulsões', 'Compulsões'],
+]);
