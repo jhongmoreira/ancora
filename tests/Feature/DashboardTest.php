@@ -23,6 +23,16 @@ test('dashboard renders with no data yet', function () {
         ->assertSee('Nenhum registro no período selecionado');
 });
 
+test('toolbar has an icon button to log a compulsion, hidden in the shared view', function () {
+    Livewire::actingAs($this->user)
+        ->test(Dashboard::class)
+        ->assertSee('aria-label="Registrar compulsão"', false)
+        ->assertSee(route('compulsions.log'), false);
+
+    Livewire::test(Dashboard::class, ['patient' => $this->user->patient, 'readOnly' => true])
+        ->assertDontSee('Registrar compulsão');
+});
+
 test('chart data aggregates logs by mood category and feeling', function () {
     $positive = MoodCategory::where('key', 'positivo')->first();
     $negative = MoodCategory::where('key', 'negativo')->first();
