@@ -27,6 +27,9 @@ Route::middleware(['auth', 'onboarded'])->group(function () {
     Route::get('relatorios/pdf', [ExportController::class, 'pdf'])->name('reports.pdf');
     Route::get('relatorios/excel', [ExportController::class, 'excel'])->name('reports.excel');
 
+    Route::view('compulsoes', 'compulsions.index')->name('compulsions.index');
+    Route::view('compulsoes/registrar', 'compulsions.log')->name('compulsions.log');
+
     Route::view('lembretes', 'reminders.index')->name('reminders.index');
 
     Route::view('compartilhar', 'share.manage')->name('share.manage');
@@ -46,6 +49,7 @@ Route::prefix('compartilhado/{token}')->group(function () {
     Route::middleware('share.access')->group(function () {
         Route::get('/dashboard', [ShareAccessController::class, 'dashboard'])->name('share.dashboard');
         Route::get('/historico', [ShareAccessController::class, 'history'])->name('share.history');
+        Route::get('/compulsoes', [ShareAccessController::class, 'compulsions'])->name('share.compulsions');
     });
 });
 
