@@ -65,22 +65,29 @@
 
             <div class="space-y-3">
                 @foreach ($dayLogs as $log)
+                    @php
+                        // Classes completas (não interpoladas) para o Tailwind detectá-las no build.
+                        $moodStyle = [
+                            'green' => ['card' => 'bg-green-50 border-green-500', 'tag' => 'bg-green-700 text-white'],
+                            'gray' => ['card' => 'bg-slate-100 border-slate-400', 'tag' => 'bg-slate-600 text-white'],
+                            'red' => ['card' => 'bg-red-50 border-red-500', 'tag' => 'bg-red-700 text-white'],
+                        ][$log->moodCategory->color] ?? ['card' => 'bg-white border-gray-400', 'tag' => 'bg-gray-600 text-white'];
+                    @endphp
                     <div
                         wire:key="log-{{ $log->id }}"
-                        class="bg-white shadow-sm sm:rounded-lg p-4 border-l-4"
-                        style="border-left-color: {{ ['green' => '#16a34a', 'gray' => '#6b7280', 'red' => '#dc2626'][$log->moodCategory->color] ?? '#6b7280' }}"
+                        class="{{ $moodStyle['card'] }} shadow-sm sm:rounded-lg p-4 border-l-4"
                         x-data="{ expanded: false }"
                     >
                         <div class="flex items-start justify-between gap-4">
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2 flex-wrap">
                                     <span class="text-sm font-medium text-gray-800">{{ $log->occurred_at->format('H:i') }}</span>
-                                    <span class="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">{{ $log->moodCategory->label }}</span>
+                                    <span class="text-xs font-semibold px-2 py-0.5 rounded-full {{ $moodStyle['tag'] }}">{{ $log->moodCategory->label }}</span>
                                     @if ($log->intensity)
-                                        <span class="text-xs text-gray-400">intensidade {{ $log->intensity }}/5</span>
+                                        <span class="text-xs text-gray-500">intensidade {{ $log->intensity }}/5</span>
                                     @endif
                                     @foreach ($log->feelings as $feeling)
-                                        <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">{{ $feeling->name }}</span>
+                                        <span class="text-xs px-2 py-0.5 rounded-full bg-white/80 text-gray-700 ring-1 ring-black/5">{{ $feeling->name }}</span>
                                     @endforeach
                                 </div>
 
@@ -107,7 +114,7 @@
                                             <button type="button" wire:click="cancelDelete" class="text-xs text-gray-500">Cancelar</button>
                                         </div>
                                     @else
-                                        <button type="button" wire:click="confirmDelete({{ $log->id }})" class="text-xs text-gray-400 hover:text-red-600">Excluir</button>
+                                        <button type="button" wire:click="confirmDelete({{ $log->id }})" class="text-xs text-gray-500 hover:text-red-600">Excluir</button>
                                     @endif
                                 </div>
                             @endunless
