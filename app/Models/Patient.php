@@ -45,6 +45,16 @@ class Patient extends Model
         return $this->hasMany(EmotionLog::class);
     }
 
+    public function compulsions(): HasMany
+    {
+        return $this->hasMany(Compulsion::class);
+    }
+
+    public function compulsionLogs(): HasMany
+    {
+        return $this->hasMany(CompulsionLog::class);
+    }
+
     public function reminders(): HasMany
     {
         return $this->hasMany(Reminder::class);

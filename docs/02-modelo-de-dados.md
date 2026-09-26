@@ -179,6 +179,16 @@ Adicionadas no módulo de compartilhamento com a psicóloga (pós-MVP):
 
 Gerar um novo link é um `updateOrCreate` por `patient_id`: substitui token/PIN/expiração da mesma linha, invalidando o link anterior automaticamente.
 
+### `compulsions`, `compulsion_logs` e `compulsion_log_feeling` (doc 14)
+
+Adicionadas no mapa de compulsões (pós-MVP):
+
+| Tabela | Campos principais |
+|---|---|
+| `compulsions` | `patient_id`, `name`, `description` (opcional), `archived_at` (arquivar esconde do registro sem apagar histórico) |
+| `compulsion_logs` | `patient_id`, `compulsion_id`, `occurred_at`, `outcome` (`gave_in`/`resisted`), `urge_intensity` (0-10), `trigger`, `automatic_thought`, `duration_minutes` (só se cedeu), `coping_strategy`, `notes` |
+| `compulsion_log_feeling` | `compulsion_log_id`, `feeling_id`, `moment` (`before`/`after`) — único nos três; reaproveita o catálogo `feelings` |
+
 ## 3. Ordem das migrations
 
 1. `create_professionals_table`

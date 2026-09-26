@@ -23,6 +23,7 @@
                             @isset($patient)
                                 <a href="{{ route('share.dashboard', $token) }}" class="text-sm text-gray-600 hover:text-gray-900">Dashboard</a>
                                 <a href="{{ route('share.history', $token) }}" class="text-sm text-gray-600 hover:text-gray-900">Histórico</a>
+                                <a href="{{ route('share.compulsions', $token) }}" class="text-sm text-gray-600 hover:text-gray-900">Compulsões</a>
                             @endisset
                         </div>
                         <span class="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full bg-amber-100 text-amber-800 font-medium" title="Acesso compartilhado — somente leitura">
