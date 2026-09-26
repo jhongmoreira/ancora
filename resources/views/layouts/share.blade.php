@@ -34,10 +34,20 @@
 
             @isset($patient)
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-                    <p class="text-sm text-gray-500">
-                        Dados de <span class="font-medium text-gray-800">{{ $patient->initials }}</span>
+                    <p class="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm text-gray-500">
+                        <span>Paciente: <span class="font-medium text-gray-800">{{ $patient->initials }}</span></span>
+                        @if ($patient->professional)
+                            <span aria-hidden="true">·</span>
+                            <span>Psicóloga(o): <span class="font-medium text-gray-800">{{ $patient->professional->name }}</span></span>
+                        @endif
                         @isset($expiresAt)
-                            <span class="font-bold text-red-600"> · este acesso expira em {{ $expiresAt->format('d/m/Y \à\s H:i') }}</span>
+                            <span aria-hidden="true">·</span>
+                            <span class="inline-flex items-center gap-1 font-bold text-red-600">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                                Expira em {{ $expiresAt->format('d/m/Y \à\s H:i') }}
+                            </span>
                         @endisset
                     </p>
                 </div>
