@@ -29,7 +29,7 @@ new class extends Component
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <div class="hidden space-x-8 lg:-my-px lg:ms-10 lg:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </x-nav-link>
@@ -48,24 +48,29 @@ new class extends Component
                     <x-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.index')" wire:navigate>
                         {{ __('Relatórios') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('reminders.index')" :active="request()->routeIs('reminders.index')" wire:navigate>
-                        {{ __('Lembretes') }}
-                    </x-nav-link>
                     <x-nav-link :href="route('share.manage')" :active="request()->routeIs('share.manage')" wire:navigate>
                         {{ __('Compartilhar') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('patient.edit')" :active="request()->routeIs('patient.edit')" wire:navigate>
-                        {{ __('Meus dados') }}
                     </x-nav-link>
                 </div>
             </div>
 
             <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <div class="hidden lg:flex lg:items-center lg:ms-6">
+                {{-- Menu do usuário: agrupa as páginas pessoais (Meus dados, Lembretes, Perfil) para aliviar a barra principal. --}}
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <div x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
+                        <button @class([
+                            'inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150',
+                            'text-gray-900' => request()->routeIs('patient.edit', 'reminders.index', 'profile'),
+                            'text-gray-500' => ! request()->routeIs('patient.edit', 'reminders.index', 'profile'),
+                        ])>
+                            <div
+                                class="max-w-40 truncate whitespace-nowrap"
+                                x-data="{{ json_encode(['name' => auth()->user()->name]) }}"
+                                x-text="name"
+                                x-bind:title="name"
+                                x-on:profile-updated.window="name = $event.detail.name"
+                            >{{ auth()->user()->name }}</div>
 
                             <div class="ms-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -76,14 +81,22 @@ new class extends Component
                     </x-slot>
 
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('profile')" wire:navigate>
-                            {{ __('Profile') }}
+                        <x-dropdown-link :href="route('patient.edit')" wire:navigate :class="request()->routeIs('patient.edit') ? 'font-medium text-indigo-700 bg-indigo-50' : ''">
+                            {{ __('Meus dados') }}
                         </x-dropdown-link>
+                        <x-dropdown-link :href="route('reminders.index')" wire:navigate :class="request()->routeIs('reminders.index') ? 'font-medium text-indigo-700 bg-indigo-50' : ''">
+                            {{ __('Lembretes') }}
+                        </x-dropdown-link>
+                        <x-dropdown-link :href="route('profile')" wire:navigate :class="request()->routeIs('profile') ? 'font-medium text-indigo-700 bg-indigo-50' : ''">
+                            {{ __('Perfil e senha') }}
+                        </x-dropdown-link>
+
+                        <div class="border-t border-gray-100"></div>
 
                         <!-- Authentication -->
                         <button wire:click="logout" class="w-full text-start">
                             <x-dropdown-link>
-                                {{ __('Log Out') }}
+                                {{ __('Sair') }}
                             </x-dropdown-link>
                         </button>
                     </x-slot>
@@ -91,7 +104,7 @@ new class extends Component
             </div>
 
             <!-- Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
+            <div class="-me-2 flex items-center lg:hidden">
                 <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -103,7 +116,7 @@ new class extends Component
     </div>
 
     <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+    <div :class="{'block': open, 'hidden': ! open}" class="hidden lg:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                 {{ __('Dashboard') }}
@@ -123,33 +136,33 @@ new class extends Component
             <x-responsive-nav-link :href="route('reports.index')" :active="request()->routeIs('reports.index')" wire:navigate>
                 {{ __('Relatórios') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('reminders.index')" :active="request()->routeIs('reminders.index')" wire:navigate>
-                {{ __('Lembretes') }}
-            </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('share.manage')" :active="request()->routeIs('share.manage')" wire:navigate>
                 {{ __('Compartilhar') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('patient.edit')" :active="request()->routeIs('patient.edit')" wire:navigate>
-                {{ __('Meus dados') }}
             </x-responsive-nav-link>
         </div>
 
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200">
             <div class="px-4">
-                <div class="font-medium text-base text-gray-800" x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name"></div>
+                <div class="font-medium text-base text-gray-800" x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name" x-on:profile-updated.window="name = $event.detail.name">{{ auth()->user()->name }}</div>
                 <div class="font-medium text-sm text-gray-500">{{ auth()->user()->email }}</div>
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile')" wire:navigate>
-                    {{ __('Profile') }}
+                <x-responsive-nav-link :href="route('patient.edit')" :active="request()->routeIs('patient.edit')" wire:navigate>
+                    {{ __('Meus dados') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('reminders.index')" :active="request()->routeIs('reminders.index')" wire:navigate>
+                    {{ __('Lembretes') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('profile')" :active="request()->routeIs('profile')" wire:navigate>
+                    {{ __('Perfil e senha') }}
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->
                 <button wire:click="logout" class="w-full text-start">
                     <x-responsive-nav-link>
-                        {{ __('Log Out') }}
+                        {{ __('Sair') }}
                     </x-responsive-nav-link>
                 </button>
             </div>
