@@ -140,11 +140,15 @@ document.addEventListener('alpine:init', () => {
                         data: series.data,
                         borderColor: series.color,
                         backgroundColor: series.color,
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 4,
                         tension: 0.3,
                     })),
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
                 },
             };
@@ -155,7 +159,7 @@ document.addEventListener('alpine:init', () => {
                 type: 'bar',
                 data: {
                     labels: data.feelingLabels,
-                    datasets: [{ label: 'Ocorrências', data: data.feelingCounts, backgroundColor: '#6366f1' }],
+                    datasets: [{ label: 'Ocorrências', data: data.feelingCounts, backgroundColor: data.feelingColors }],
                 },
                 options: {
                     indexAxis: 'y',

@@ -45,7 +45,7 @@ class EmotionStats
     {
         return $this->logsCache ??= $this->patient
             ->emotionLogs()
-            ->with('feelings', 'moodCategory')
+            ->with('feelings.moodCategory', 'moodCategory')
             ->whereDate('occurred_at', '>=', $this->from)
             ->whereDate('occurred_at', '<=', $this->to)
             ->get();
@@ -72,10 +72,13 @@ class EmotionStats
             ];
         })->values();
 
-        $feelingCounts = $logs->flatMap->feelings
+        $feelingGroups = $logs->flatMap->feelings
             ->groupBy('name')
-            ->map->count()
-            ->sortDesc()
+            ->map(fn ($group) => [
+                'count' => $group->count(),
+                'color' => self::COLORS[$group->first()->moodCategory->color] ?? '#6b7280',
+            ])
+            ->sortByDesc('count')
             ->take(8);
 
         $distribution = $moodCategories->map(
@@ -85,8 +88,9 @@ class EmotionStats
         return [
             'labels' => $days->map(fn ($day) => Carbon::parse($day)->format('d/m'))->values(),
             'moodSeries' => $moodSeries,
-            'feelingLabels' => $feelingCounts->keys()->values(),
-            'feelingCounts' => $feelingCounts->values(),
+            'feelingLabels' => $feelingGroups->keys()->values(),
+            'feelingCounts' => $feelingGroups->pluck('count')->values(),
+            'feelingColors' => $feelingGroups->pluck('color')->values(),
             'distributionLabels' => $moodCategories->pluck('label')->values(),
             'distributionColors' => $moodCategories->pluck('color')->map(fn ($c) => self::COLORS[$c] ?? '#6b7280')->values(),
             'distribution' => $distribution->values(),
