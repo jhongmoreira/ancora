@@ -14,11 +14,6 @@ class InsightReportService
 {
     public const PROMPT_VERSION = '2';
 
-    /** Intervalo mínimo entre gerações, em segundos. */
-    public const COOLDOWN_SECONDS = 300;
-
-    public const MAX_PER_DAY = 10;
-
     public function __construct(
         protected InsightDataBuilder $builder,
         protected GeminiClient $gemini,
@@ -104,15 +99,17 @@ class InsightReportService
 
     /**
      * Protege a cota gratuita e evita cliques repetidos: 1 geração a cada
-     * 5 minutos e até 10 por dia.
+     * `insights.cooldown_seconds` e até `insights.max_reports_per_day` por
+     * dia (config/insights.php, configurável via .env).
      */
     protected function hitRateLimits(Patient $patient): void
     {
         $cooldownKey = "insights:cooldown:{$patient->id}";
         $dailyKey = "insights:daily:{$patient->id}";
+        $maxPerDay = config('insights.max_reports_per_day');
 
-        if (RateLimiter::tooManyAttempts($dailyKey, self::MAX_PER_DAY)) {
-            throw new InsightUnavailableException('Você atingiu o limite de '.self::MAX_PER_DAY.' relatórios por dia. Tente novamente amanhã.');
+        if (RateLimiter::tooManyAttempts($dailyKey, $maxPerDay)) {
+            throw new InsightUnavailableException("Você atingiu o limite de {$maxPerDay} relatórios por dia. Tente novamente amanhã.");
         }
 
         if (RateLimiter::tooManyAttempts($cooldownKey, 1)) {
@@ -121,7 +118,7 @@ class InsightReportService
             throw new InsightUnavailableException("Aguarde {$minutes} ".($minutes === 1 ? 'minuto' : 'minutos').' para gerar um novo relatório.');
         }
 
-        RateLimiter::hit($cooldownKey, self::COOLDOWN_SECONDS);
+        RateLimiter::hit($cooldownKey, config('insights.cooldown_seconds'));
         RateLimiter::hit($dailyKey, 86400);
     }
 }

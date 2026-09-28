@@ -264,6 +264,19 @@ test('does not generate without consent, with too few records or too often', fun
     Http::assertSentCount(1);
 });
 
+test('the daily and cooldown limits are read from config, not hardcoded', function () {
+    config(['insights.max_reports_per_day' => 1, 'insights.cooldown_seconds' => 0]);
+    Http::fake(['*' => ($this->geminiResponse)(($this->content)())]);
+    $service = app(InsightReportService::class);
+
+    $service->generate($this->patient);
+
+    expect(fn () => $service->generate($this->patient))
+        ->toThrow(InsightUnavailableException::class, 'limite de 1 relatórios por dia');
+
+    Http::assertSentCount(1);
+});
+
 test('risk detector flags self-harm language, ignores common idioms', function () {
     $detector = new RiskDetector;
 
