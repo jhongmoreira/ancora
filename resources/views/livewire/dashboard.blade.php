@@ -113,7 +113,9 @@
     <div wire:ignore x-data="ancoraDashboard(@js($chartData))" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-white shadow sm:rounded-lg p-4 sm:p-6 lg:col-span-2">
             <h3 class="text-sm font-semibold text-gray-700 mb-4">Evolução por humor</h3>
-            <canvas x-ref="evolutionCanvas" height="90"></canvas>
+            <div class="relative h-56 sm:h-64">
+                <canvas x-ref="evolutionCanvas"></canvas>
+            </div>
         </div>
 
         <div class="bg-white shadow sm:rounded-lg p-4 sm:p-6">
