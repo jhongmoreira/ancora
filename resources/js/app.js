@@ -140,11 +140,15 @@ document.addEventListener('alpine:init', () => {
                         data: series.data,
                         borderColor: series.color,
                         backgroundColor: series.color,
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 4,
                         tension: 0.3,
                     })),
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
                 },
             };
