@@ -155,7 +155,7 @@ document.addEventListener('alpine:init', () => {
                 type: 'bar',
                 data: {
                     labels: data.feelingLabels,
-                    datasets: [{ label: 'Ocorrências', data: data.feelingCounts, backgroundColor: '#6366f1' }],
+                    datasets: [{ label: 'Ocorrências', data: data.feelingCounts, backgroundColor: data.feelingColors }],
                 },
                 options: {
                     indexAxis: 'y',
