@@ -168,7 +168,7 @@ LLMs erram na detecção de risco, sobretudo na ideação passiva ([revisão](ht
 ### 6.2 Geração (UX)
 
 - Clicar em "Gerar" desabilita o botão e mostra uma tela de carregamento com etapas ("Reunindo seus registros…", "Anonimizando…", "Analisando padrões…"), porque a chamada leva de 10 a 30s.
-- **Controle de uso:** no máximo 1 geração a cada 5 minutos e 10 por dia por paciente, via `RateLimiter`, com uma mensagem amigável.
+- **Controle de uso:** no máximo 1 geração a cada `INSIGHTS_COOLDOWN_SECONDS` segundos (padrão: 5 minutos) e `INSIGHTS_MAX_REPORTS_PER_DAY` por dia (padrão: 10) por paciente, via `RateLimiter` — configurável no `.env`/`config/insights.php`, sem precisar de deploy de código, pra ajustar quando a cota disponível na API do Gemini mudar.
 - **Em caso de erro** (cota esgotada, timeout, JSON inválido): mensagem clara e "Tentar novamente". O relatório fica salvo como `failed`.
 
 ### 6.3 Psicóloga — `/compartilhado/{token}/insights` (`share.insights`)
