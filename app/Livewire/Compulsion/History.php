@@ -45,6 +45,10 @@ class History extends Component
     #[Url]
     public $compulsion = null;
 
+    /** Ordem cronológica da lista: 'desc' (mais recentes primeiro, padrão) ou 'asc' (mais antigos primeiro). */
+    #[Url]
+    public string $order = 'desc';
+
     public ?int $confirmingDeleteId = null;
 
     public function mount(?Patient $patient = null, bool $readOnly = false, ?string $shareToken = null): void
@@ -53,7 +57,14 @@ class History extends Component
         $this->readOnly = $readOnly;
         $this->shareToken = $shareToken;
         $this->compulsion = is_numeric($this->compulsion) ? (int) $this->compulsion : null;
+        $this->order = $this->order === 'asc' ? 'asc' : 'desc';
         $this->applyPeriodPreset($this->period);
+    }
+
+    public function toggleOrder(): void
+    {
+        $this->order = $this->order === 'desc' ? 'asc' : 'desc';
+        $this->resetPage();
     }
 
     public function updatedPeriod(string $value): void
@@ -143,8 +154,14 @@ class History extends Component
     {
         return $this->stats()->query()
             ->with(['compulsion', 'feelings'])
-            ->orderByDesc('occurred_at')
+            ->orderBy('occurred_at', $this->order === 'asc' ? 'asc' : 'desc')
             ->paginate(20);
+    }
+
+    #[Computed]
+    public function groupedLogs(): Collection
+    {
+        return $this->logs->getCollection()->groupBy(fn ($log) => $log->occurred_at->toDateString());
     }
 
     public function confirmDelete(int $id): void

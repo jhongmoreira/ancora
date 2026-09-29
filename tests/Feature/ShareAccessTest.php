@@ -109,6 +109,25 @@ test('history view is read only and cannot delete records', function () {
     expect($this->user->patient->emotionLogs()->count())->toBe(1);
 });
 
+test('shared history lists logs newest first by default', function () {
+    $this->post(route('share.verify', $this->link->token), ['pin' => $this->pin]);
+
+    $this->user->patient->emotionLogs()->create([
+        'mood_category_id' => MoodCategory::first()->id,
+        'occurred_at' => now()->subDays(2),
+        'situation' => 'Registro mais antigo',
+        'action' => 'Ação',
+    ]);
+
+    \Livewire\Livewire::test(\App\Livewire\EmotionLog\History::class, [
+        'patient' => $this->user->patient,
+        'readOnly' => true,
+        'shareToken' => $this->link->token,
+    ])
+        ->assertSet('order', 'desc')
+        ->assertSeeInOrder(['Situação sigilosa do paciente', 'Registro mais antigo']);
+});
+
 test('regenerating the link invalidates the old token immediately', function () {
     $oldToken = $this->link->token;
 
