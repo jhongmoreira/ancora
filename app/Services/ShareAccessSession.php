@@ -15,6 +15,12 @@ class ShareAccessSession
         session()->put($this->key($token), now()->getTimestamp());
     }
 
+    /** Encerra o acesso agora (botão "Sair"). */
+    public function end(string $token): void
+    {
+        session()->forget($this->key($token));
+    }
+
     /** Diz se o PIN deste link foi validado nesta sessão e o prazo ainda não acabou. */
     public function isActive(string $token): bool
     {
@@ -26,7 +32,7 @@ class ShareAccessSession
 
         // Sessões anteriores a este controle guardavam só `true`: tratadas como vencidas.
         if (! is_int($grantedAt) || now()->getTimestamp() - $grantedAt > $this->validitySeconds()) {
-            session()->forget($this->key($token));
+            $this->end($token);
             session()->flash('status', "Por segurança, o PIN vale por {$this->validityMinutes()} minutos. Digite-o novamente para continuar.");
 
             return false;

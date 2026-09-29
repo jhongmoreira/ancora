@@ -216,6 +216,30 @@ test('pin validity is configurable', function () {
         ->assertRedirect(route('share.pin', $this->link->token));
 });
 
+test('sair ends the shared access immediately', function () {
+    $this->post(route('share.verify', $this->link->token), ['pin' => $this->pin]);
+
+    $this->post(route('share.logout', $this->link->token))
+        ->assertRedirect(route('share.pin', $this->link->token));
+
+    $this->get(route('share.pin', $this->link->token))
+        ->assertOk()
+        ->assertSee('Acesso encerrado')
+        ->assertSee('Digite o PIN');
+
+    $this->get(route('share.dashboard', $this->link->token))
+        ->assertRedirect(route('share.pin', $this->link->token));
+});
+
+test('shared pages show the sair button', function () {
+    $this->post(route('share.verify', $this->link->token), ['pin' => $this->pin]);
+
+    $this->get(route('share.dashboard', $this->link->token))
+        ->assertOk()
+        ->assertSee('action="'.route('share.logout', $this->link->token).'"', false)
+        ->assertSee('Sair');
+});
+
 test('history view is read only and cannot delete records', function () {
     $this->post(route('share.verify', $this->link->token), ['pin' => $this->pin]);
 

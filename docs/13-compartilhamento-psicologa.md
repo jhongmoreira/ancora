@@ -15,6 +15,7 @@ login/conta própria no Âncora.
 - `token`: string aleatória de 48 caracteres (`Str::random(48)`), usada na URL — inadivinhável por força bruta.
 - `pin_hash`: PIN de 6 dígitos numéricos, armazenado com `Hash::make()` (bcrypt), nunca em texto puro. O PIN em texto só existe na memória logo após a geração, para exibição única ao paciente.
 - Sem tabela de "sessão de acesso" separada: a verificação do PIN grava na sessão HTTP padrão do Laravel (`share_access.{token}`) o horário em que o PIN foi digitado (`ShareAccessSession`). O acesso vale até o link expirar ou até passar `SHARE_PIN_VALIDITY_MINUTES` (padrão 60, em `config/share.php`) desde o PIN — o que vier primeiro. É um prazo fixo: navegar, recarregar ou mexer nos filtros não prorroga. Depois disso, a tela de PIN reaparece com o aviso de que o PIN precisa ser digitado de novo. O cabeçalho das páginas mostra uma contagem discreta até o fechamento.
+- **Botão "Sair"** na barra (`POST /compartilhado/{token}/sair`): apaga o acesso da sessão na hora e volta para a tela de PIN. Fechar a aba, por si só, não encerra o acesso (o navegador não avisa isso de forma confiável, e navegar/recarregar é indistinguível de fechar); nesse caso vale o prazo do PIN.
 
 ## 2. Fluxo do paciente (`/compartilhar`, autenticado)
 
