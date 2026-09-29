@@ -19,8 +19,11 @@ use Illuminate\Support\Facades\DB;
  * depois de resistir e melhora gradual (mais "resistiu" no fim do período).
  *
  * Só acrescenta: não apaga compulsões nem registros feitos à mão. Para não
- * duplicar, não roda de novo se o paciente já tiver registros de demonstração.
+ * duplicar, pula cada compulsão que já tiver registros de demonstração.
  * Determinístico: usa semente fixa.
+ *
+ * Para popular só algumas compulsões (ex.: no tinker):
+ *   app(DemoCompulsionLogSeeder::class)->run(['Álcool']);
  */
 class DemoCompulsionLogSeeder extends Seeder
 {
@@ -60,9 +63,42 @@ class DemoCompulsionLogSeeder extends Seeder
             ],
             'duration' => [15, 90],
         ],
+        'Álcool' => [
+            'description' => null,
+            'daily_chance' => 0.45,
+            // Fim de tarde e noite, com picos depois do expediente e perto da meia-noite.
+            'hours' => [12 => 1, 17 => 1, 18 => 3, 19 => 4, 20 => 4, 21 => 3, 22 => 2, 23 => 1],
+            'scenarios' => [
+                ['trigger' => 'Happy hour com os colegas depois do expediente', 'thought' => 'Todo mundo vai beber, não vou ficar de fora', 'before' => ['Animado', 'Ansioso']],
+                ['trigger' => 'Cheguei em casa sozinho depois de um dia estressante', 'thought' => 'Uma cerveja pra desestressar não faz mal', 'before' => ['Cansado', 'Frustrado']],
+                ['trigger' => 'Churrasco de família no fim de semana', 'thought' => 'É só hoje, é dia de comemorar', 'before' => ['Alegre']],
+                ['trigger' => 'Depois de uma discussão com meu pai por telefone', 'thought' => 'Preciso esquecer isso', 'before' => ['Com raiva', 'Triste']],
+                ['trigger' => 'Sexta à noite em casa sem nada pra fazer', 'thought' => 'Sem beber a noite não passa', 'before' => ['Entediado', 'Sozinho']],
+                ['trigger' => 'Preocupado com a entrega do projeto na segunda', 'thought' => 'Bebendo eu consigo dormir', 'before' => ['Ansioso']],
+            ],
+            'after_gave_in' => [['Culpado', 'Cansado'], ['Envergonhado', 'Triste'], ['Aliviado', 'Culpado'], ['Frustrado', 'Ansioso'], ['Culpado', 'Envergonhado']],
+            'after_resisted' => [['Orgulhoso', 'Confiante'], ['Orgulhoso', 'Calmo'], ['Aliviado'], ['Calmo', 'Cansado'], ['Confiante', 'Ansioso']],
+            'coping_gave_in' => [
+                'Ter pedido refrigerante logo na primeira rodada',
+                'Não ter deixado cerveja na geladeira',
+                'Ter ido embora mais cedo do bar',
+                null,
+            ],
+            'coping_resisted' => [
+                'Pedi água com gás e limão no bar',
+                'Fui à academia em vez de ir pro happy hour',
+                'Liguei para minha irmã e a vontade passou',
+                'Cozinhei um jantar caprichado pra ocupar a cabeça',
+                'Avisei os amigos que não estou bebendo e fiquei só no refri',
+            ],
+            'duration' => [60, 240],
+        ],
     ];
 
-    public function run(): void
+    /**
+     * @param  array<string>|null  $only  Nomes de compulsões a popular; null = todas.
+     */
+    public function run(?array $only = null): void
     {
         $user = User::where('email', 'dev@ancora.test')->first();
         $patient = $user?->patient;
@@ -73,17 +109,19 @@ class DemoCompulsionLogSeeder extends Seeder
             return;
         }
 
-        if ($patient->compulsionLogs()->where('notes', self::SEEDED_NOTE)->exists()) {
-            $this->command?->warn('Os registros de demonstração de compulsões já existem — nada a fazer.');
-
-            return;
-        }
-
         mt_srand(20260927);
 
-        DB::transaction(function () use ($patient) {
-            foreach (self::COMPULSIONS as $name => $config) {
+        $compulsions = $only === null ? self::COMPULSIONS : array_intersect_key(self::COMPULSIONS, array_flip($only));
+
+        DB::transaction(function () use ($patient, $compulsions) {
+            foreach ($compulsions as $name => $config) {
                 $compulsion = $patient->compulsions()->firstOrCreate(['name' => $name], ['description' => $config['description']]);
+
+                if ($compulsion->logs()->where('notes', self::SEEDED_NOTE)->exists()) {
+                    $this->command?->warn("Os registros de demonstração de \"{$name}\" já existem — pulando.");
+
+                    continue;
+                }
 
                 $this->seedLogs($patient, $compulsion, $config);
             }

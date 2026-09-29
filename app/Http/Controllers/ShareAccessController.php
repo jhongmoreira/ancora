@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ShareLink;
+use App\Services\ShareAccessSession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
@@ -21,7 +22,7 @@ class ShareAccessController extends Controller
             return view('share.invalid');
         }
 
-        if (session()->get("share_access.{$token}")) {
+        if (app(ShareAccessSession::class)->isActive($token)) {
             return redirect()->route('share.dashboard', $token);
         }
 
@@ -59,7 +60,7 @@ class ShareAccessController extends Controller
         }
 
         RateLimiter::clear($throttleKey);
-        $request->session()->put("share_access.{$token}", true);
+        app(ShareAccessSession::class)->grant($token);
 
         $link->patient->shareLinkAccesses()->create([
             'ip_address' => $request->ip(),
@@ -68,6 +69,27 @@ class ShareAccessController extends Controller
         ]);
 
         return redirect()->route('share.dashboard', $token);
+    }
+
+    /**
+     * Consultado periodicamente pela página compartilhada aberta (ver
+     * ancoraShareGuard em resources/js/app.js): quando deixa de ser válido
+     * (expirou, foi revogado/regenerado, o PIN não foi validado nesta sessão
+     * ou o prazo do PIN acabou), a página apaga o conteúdo da tela e volta
+     * para share.pin.
+     */
+    public function status(string $token)
+    {
+        $link = ShareLink::where('token', $token)->first();
+
+        $access = app(ShareAccessSession::class);
+        $valid = $link && ! $link->isExpired() && $access->isActive($token);
+
+        return response()->json([
+            'valid' => (bool) $valid,
+            'remaining_seconds' => $valid ? max(0, (int) now()->diffInSeconds($link->expires_at)) : 0,
+            'pin_remaining_seconds' => $valid ? $access->remainingSeconds($token) : 0,
+        ])->header('Cache-Control', 'no-store, private');
     }
 
     public function dashboard(Request $request, string $token)

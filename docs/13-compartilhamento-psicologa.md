@@ -14,7 +14,7 @@ login/conta própria no Âncora.
 
 - `token`: string aleatória de 48 caracteres (`Str::random(48)`), usada na URL — inadivinhável por força bruta.
 - `pin_hash`: PIN de 6 dígitos numéricos, armazenado com `Hash::make()` (bcrypt), nunca em texto puro. O PIN em texto só existe na memória logo após a geração, para exibição única ao paciente.
-- Sem tabela de "sessão de acesso" separada: a verificação do PIN grava uma flag na sessão HTTP padrão do Laravel (`share_access.{token}`), válida enquanto a sessão do navegador durar ou até o link expirar — o que vier primeiro.
+- Sem tabela de "sessão de acesso" separada: a verificação do PIN grava na sessão HTTP padrão do Laravel (`share_access.{token}`) o horário em que o PIN foi digitado (`ShareAccessSession`). O acesso vale até o link expirar ou até passar `SHARE_PIN_VALIDITY_MINUTES` (padrão 60, em `config/share.php`) desde o PIN — o que vier primeiro. É um prazo fixo: navegar, recarregar ou mexer nos filtros não prorroga. Depois disso, a tela de PIN reaparece com o aviso de que o PIN precisa ser digitado de novo. O cabeçalho das páginas mostra uma contagem discreta até o fechamento.
 
 ## 2. Fluxo do paciente (`/compartilhar`, autenticado)
 
@@ -43,6 +43,8 @@ Em vez de duplicar a lógica de agregação/filtros, os componentes `Dashboard` 
 - Token longo e aleatório na URL — o PIN é uma segunda camada, não a única proteção.
 - Rate limiting por token+IP nas tentativas de PIN.
 - Verificação de expiração a cada request às rotas protegidas e a cada requisição do Livewire nos componentes compartilhados (não só no momento do PIN), então revogar/expirar tem efeito imediato mesmo com a sessão já autenticada e a página ainda aberta.
+- A página que já está na tela também é fechada: o layout compartilhado carrega o componente Alpine `ancoraShareGuard` (`resources/js/app.js`), que apaga o conteúdo e volta para `share.pin` (tela de link inválido) no horário de expiração e sempre que `GET /compartilhado/{token}/status` responder `valid: false` (inclusive quando o prazo do PIN acaba) — consultado a cada 60 s, ao voltar para a aba e ao restaurar a página pelo botão "voltar". Revogar ou regenerar o link fecha as páginas abertas em até ~1 min. Falha de rede não fecha a página (o prazo de expiração local continua valendo).
+- Respostas das rotas protegidas saem com `Cache-Control: no-store`, para o navegador não guardar cópia dos dados nem reexibi-los pelo histórico depois do fim do acesso.
 - Somente leitura garantido no servidor, não só escondendo botões na UI.
 - Histórico de acesso (IP, dispositivo, data/hora) dá visibilidade ao paciente sobre quem usou o link — dado sensível (diário emocional), então essa transparência foi priorizada mesmo no escopo enxuto do app.
 

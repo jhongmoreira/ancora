@@ -67,6 +67,56 @@ test('dashboard and history show the link expiration date', function () {
         ->assertSee($expiresLabel);
 });
 
+test('shared pages are not cached by the browser', function () {
+    $this->post(route('share.verify', $this->link->token), ['pin' => $this->pin]);
+
+    $response = $this->get(route('share.dashboard', $this->link->token))->assertOk();
+
+    expect($response->headers->get('Cache-Control'))->toContain('no-store');
+});
+
+test('shared pages carry the guard that closes them when the link ends', function () {
+    $this->post(route('share.verify', $this->link->token), ['pin' => $this->pin]);
+
+    $html = $this->get(route('share.history', $this->link->token))
+        ->assertOk()
+        ->assertSee('ancoraShareGuard', false)
+        ->assertSee('role="timer"', false)
+        ->getContent();
+
+    // A configuração vai como JSON escapado pelo @js; sem as barras invertidas, a URL aparece inteira.
+    expect(str_replace('\\', '', $html))->toContain(route('share.status', $this->link->token));
+});
+
+test('status reports a valid link with the remaining time', function () {
+    $this->post(route('share.verify', $this->link->token), ['pin' => $this->pin]);
+
+    $this->getJson(route('share.status', $this->link->token))
+        ->assertOk()
+        ->assertJson(['valid' => true])
+        ->assertJsonPath('remaining_seconds', fn ($seconds) => $seconds > 0 && $seconds <= 86400);
+});
+
+test('status is invalid without the pin verified in this session', function () {
+    $this->getJson(route('share.status', $this->link->token))
+        ->assertOk()
+        ->assertExactJson(['valid' => false, 'remaining_seconds' => 0, 'pin_remaining_seconds' => 0]);
+});
+
+test('status becomes invalid once the link expires, is revoked or regenerated', function (string $how) {
+    $this->post(route('share.verify', $this->link->token), ['pin' => $this->pin]);
+
+    match ($how) {
+        'expired' => $this->travel(2)->days(),
+        'revoked' => $this->link->delete(),
+        'regenerated' => app(ShareLinkService::class)->generate($this->user->patient, now()->addDay()),
+    };
+
+    $this->getJson(route('share.status', $this->link->token))
+        ->assertOk()
+        ->assertJson(['valid' => false]);
+})->with(['expired', 'revoked', 'regenerated']);
+
 test('wrong pin is rejected', function () {
     $this->post(route('share.verify', $this->link->token), ['pin' => '000000'])
         ->assertSessionHasErrors('pin');
@@ -88,9 +138,79 @@ test('pin is rate limited after 3 wrong attempts', function () {
 });
 
 test('expired link shows the invalid page even with the correct pin previously verified', function () {
-    $this->withSession(["share_access.{$this->link->token}" => true]);
+    $this->withSession(["share_access.{$this->link->token}" => now()->getTimestamp()]);
 
     $this->link->update(['expires_at' => now()->subMinute()]);
+
+    $this->get(route('share.dashboard', $this->link->token))
+        ->assertRedirect(route('share.pin', $this->link->token));
+});
+
+test('asks for the pin again 60 minutes after it was entered', function () {
+    $this->post(route('share.verify', $this->link->token), ['pin' => $this->pin]);
+
+    $this->travel(61)->minutes();
+
+    $this->get(route('share.dashboard', $this->link->token))
+        ->assertRedirect(route('share.pin', $this->link->token));
+
+    $this->get(route('share.pin', $this->link->token))
+        ->assertOk()
+        ->assertSee('o PIN vale por 60 minutos')
+        ->assertSee('Digite o PIN');
+});
+
+test('navigating or reloading does not extend the pin validity', function () {
+    $this->post(route('share.verify', $this->link->token), ['pin' => $this->pin]);
+
+    $this->travel(40)->minutes();
+    $this->get(route('share.dashboard', $this->link->token))->assertOk();
+    $this->get(route('share.dashboard', $this->link->token))->assertOk();
+    $this->getJson(route('share.status', $this->link->token))
+        ->assertJson(['valid' => true, 'pin_remaining_seconds' => 20 * 60]);
+
+    $this->travel(21)->minutes();
+    $this->get(route('share.history', $this->link->token))
+        ->assertRedirect(route('share.pin', $this->link->token));
+    $this->getJson(route('share.status', $this->link->token))->assertJson(['valid' => false]);
+});
+
+test('entering the pin again restarts the validity', function () {
+    $this->post(route('share.verify', $this->link->token), ['pin' => $this->pin]);
+
+    $this->travel(61)->minutes();
+    $this->get(route('share.dashboard', $this->link->token))->assertRedirect();
+
+    $this->post(route('share.verify', $this->link->token), ['pin' => $this->pin]);
+    $this->get(route('share.dashboard', $this->link->token))->assertOk();
+});
+
+test('open shared views stop returning data once the pin validity ends', function () {
+    $this->post(route('share.verify', $this->link->token), ['pin' => $this->pin]);
+
+    $view = \Livewire\Livewire::test(\App\Livewire\EmotionLog\History::class, [
+        'patient' => $this->user->patient,
+        'readOnly' => true,
+        'shareToken' => $this->link->token,
+    ]);
+
+    $this->travel(40)->minutes();
+    $view->call('toggleOrder')->assertNoRedirect();
+
+    $this->travel(21)->minutes();
+    $view->call('toggleOrder')
+        ->assertRedirect(route('share.pin', $this->link->token));
+
+    expect($view->effects)->not->toHaveKey('html')
+        ->and($view->instance()->patient->exists)->toBeFalse();
+});
+
+test('pin validity is configurable', function () {
+    config(['share.pin_validity_minutes' => 5]);
+
+    $this->post(route('share.verify', $this->link->token), ['pin' => $this->pin]);
+
+    $this->travel(6)->minutes();
 
     $this->get(route('share.dashboard', $this->link->token))
         ->assertRedirect(route('share.pin', $this->link->token));
@@ -107,6 +227,25 @@ test('history view is read only and cannot delete records', function () {
     ])->call('delete', $log->id);
 
     expect($this->user->patient->emotionLogs()->count())->toBe(1);
+});
+
+test('shared history lists logs newest first by default', function () {
+    $this->post(route('share.verify', $this->link->token), ['pin' => $this->pin]);
+
+    $this->user->patient->emotionLogs()->create([
+        'mood_category_id' => MoodCategory::first()->id,
+        'occurred_at' => now()->subDays(2),
+        'situation' => 'Registro mais antigo',
+        'action' => 'Ação',
+    ]);
+
+    \Livewire\Livewire::test(\App\Livewire\EmotionLog\History::class, [
+        'patient' => $this->user->patient,
+        'readOnly' => true,
+        'shareToken' => $this->link->token,
+    ])
+        ->assertSet('order', 'desc')
+        ->assertSeeInOrder(['Situação sigilosa do paciente', 'Registro mais antigo']);
 });
 
 test('regenerating the link invalidates the old token immediately', function () {
