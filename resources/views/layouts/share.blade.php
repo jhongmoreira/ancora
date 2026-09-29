@@ -31,7 +31,7 @@
             <nav class="bg-white border-b border-gray-100">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {{-- No celular: marca na 1ª linha e links na 2ª, ambos centralizados. A partir de sm, tudo numa linha à esquerda. --}}
-                    <div class="flex flex-wrap items-center gap-x-10 pt-3 sm:pt-0 sm:h-16">
+                    <div class="relative flex flex-wrap items-center gap-x-10 pt-3 sm:pt-0 sm:h-16">
                         <div class="flex w-full sm:w-auto justify-center sm:justify-start">
                             <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
                         </div>
@@ -50,6 +50,21 @@
                                     Insights
                                 </x-nav-link>
                             </div>
+
+                            {{-- No celular fica no canto da linha da marca, só com o ícone. --}}
+                            <form method="POST" action="{{ route('share.logout', $token) }}" class="absolute right-0 top-3 sm:static sm:ml-auto">
+                                @csrf
+                                <button
+                                    type="submit"
+                                    class="inline-flex items-center gap-1.5 h-9 px-2 text-sm font-medium text-gray-500 rounded-md hover:text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    title="Encerrar o acesso compartilhado"
+                                >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                                    </svg>
+                                    <span class="sr-only sm:not-sr-only">Sair</span>
+                                </button>
+                            </form>
                         @endisset
                     </div>
                 </div>

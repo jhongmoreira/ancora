@@ -92,6 +92,15 @@ class ShareAccessController extends Controller
         ])->header('Cache-Control', 'no-store, private');
     }
 
+    /** Botão "Sair" da visão compartilhada: encerra o acesso desta sessão na hora. */
+    public function logout(string $token)
+    {
+        app(ShareAccessSession::class)->end($token);
+
+        return redirect()->route('share.pin', $token)
+            ->with('status', 'Acesso encerrado. Digite o PIN para acessar novamente.');
+    }
+
     public function dashboard(Request $request, string $token)
     {
         $link = $request->attributes->get('shareLink');
