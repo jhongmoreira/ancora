@@ -182,3 +182,117 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 });
+
+document.addEventListener('alpine:init', () => {
+    // Visão compartilhada com a psicóloga (docs/13): o servidor já barra
+    // qualquer nova requisição depois que o link expira, é revogado ou o
+    // prazo do PIN acaba, mas a página que já está na tela
+    // continuaria visível. Aqui ela é apagada quando o prazo acaba (com uma
+    // contagem discreta no cabeçalho) e sempre que o servidor disser que o
+    // acesso acabou.
+    Alpine.data('ancoraShareGuard', ({ statusUrl, lockUrl, expiresInSeconds, pinRemainingSeconds, pinValidityMinutes, expiresAtLabel }) => ({
+        now: Date.now(),
+        expiresAt: Date.now() + expiresInSeconds * 1000,
+        // Prazo fixo contado de quando o PIN foi digitado: navegar ou recarregar não prorroga.
+        pinEndsAt: Date.now() + pinRemainingSeconds * 1000,
+        checking: false,
+        locked: false,
+
+        get closesAt() {
+            return Math.min(this.expiresAt, this.pinEndsAt);
+        },
+
+        get remainingLabel() {
+            const total = Math.max(0, Math.ceil((this.closesAt - this.now) / 1000));
+            const hours = Math.floor(total / 3600);
+            const minutes = Math.floor((total % 3600) / 60);
+            const seconds = String(total % 60).padStart(2, '0');
+
+            return hours > 0 ? `${hours}:${String(minutes).padStart(2, '0')}:${seconds}` : `${minutes}:${seconds}`;
+        },
+
+        get remainingTitle() {
+            return this.expiresAt <= this.pinEndsAt
+                ? `O link expira em ${expiresAtLabel}.`
+                : `Por segurança, o PIN vale por ${pinValidityMinutes} minutos. Depois disso, será pedido novamente.`;
+        },
+
+        init() {
+            this.tick = setInterval(() => {
+                this.now = Date.now();
+
+                // Antes de fechar, confirma com o servidor: o PIN pode ter sido
+                // digitado de novo em outra aba.
+                if (this.now >= this.closesAt) {
+                    this.check();
+                }
+            }, 1000);
+            this.poll = setInterval(() => this.check(), 60000);
+
+            this.onVisible = () => document.visibilityState === 'visible' && this.check();
+            this.onPageShow = (event) => event.persisted && this.check();
+            document.addEventListener('visibilitychange', this.onVisible);
+            window.addEventListener('pageshow', this.onPageShow);
+        },
+
+        destroy() {
+            clearInterval(this.tick);
+            clearInterval(this.poll);
+            document.removeEventListener('visibilitychange', this.onVisible);
+            window.removeEventListener('pageshow', this.onPageShow);
+        },
+
+        async check() {
+            if (this.checking || this.locked) {
+                return;
+            }
+
+            this.checking = true;
+
+            try {
+                const response = await fetch(statusUrl, {
+                    headers: { Accept: 'application/json' },
+                    cache: 'no-store',
+                    credentials: 'same-origin',
+                });
+
+                // 429 ou erro do servidor: mantém a página, a menos que o prazo
+                // local já tenha acabado.
+                if (!response.ok) {
+                    return this.lockIfPastDeadline();
+                }
+
+                const status = await response.json();
+
+                if (!status.valid) {
+                    return this.lock();
+                }
+
+                this.expiresAt = Date.now() + status.remaining_seconds * 1000;
+                this.pinEndsAt = Date.now() + status.pin_remaining_seconds * 1000;
+            } catch {
+                // Sem conexão: idem.
+                this.lockIfPastDeadline();
+            } finally {
+                this.checking = false;
+            }
+        },
+
+        lockIfPastDeadline() {
+            if (Date.now() >= this.closesAt) {
+                this.lock();
+            }
+        },
+
+        lock() {
+            if (this.locked) {
+                return;
+            }
+
+            this.locked = true;
+            this.destroy();
+            document.body.innerHTML = '';
+            window.location.replace(lockUrl);
+        },
+    }));
+});

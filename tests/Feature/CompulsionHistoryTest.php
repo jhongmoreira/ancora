@@ -114,6 +114,28 @@ test('fortnight period covers the last 15 days, for biweekly sessions', function
         ->assertDontSee('Fora da quinzena');
 });
 
+test('groups records by day, newest day first', function () {
+    Livewire::actingAs($this->user)
+        ->test(History::class)
+        ->assertSeeInOrder([
+            'quarta-feira, 16 de setembro',
+            'terça-feira, 15 de setembro',
+            'segunda-feira, 14 de setembro', 'Sozinho à noite',
+        ]);
+});
+
+test('toggling the order lists records oldest first and back', function () {
+    Livewire::actingAs($this->user)
+        ->test(History::class)
+        ->assertSet('order', 'desc')
+        ->call('toggleOrder')
+        ->assertSet('order', 'asc')
+        ->assertSeeInOrder(['14 de setembro', '15 de setembro', '16 de setembro'])
+        ->call('toggleOrder')
+        ->assertSet('order', 'desc')
+        ->assertSeeInOrder(['16 de setembro', '15 de setembro', '14 de setembro']);
+});
+
 test('patient can delete their own record', function () {
     $log = $this->patient->compulsionLogs()->where('trigger', 'Sozinho à noite')->first();
 

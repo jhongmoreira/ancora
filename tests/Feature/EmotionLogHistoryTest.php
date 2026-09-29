@@ -48,30 +48,31 @@ test('lists only logs within the selected period', function () {
     expect($this->user->patient->emotionLogs()->count())->toBe(2);
 });
 
-test('lists logs in chronological order, oldest first', function () {
+test('lists logs newest first by default', function () {
     createLog($this->user, 'positivo', now()->subDays(1), 'Segundo registro');
     createLog($this->user, 'positivo', now()->subDays(3), 'Primeiro registro');
     createLog($this->user, 'positivo', now(), 'Terceiro registro');
 
     Livewire::actingAs($this->user)
         ->test(History::class)
-        ->assertSeeInOrder(['Primeiro registro', 'Segundo registro', 'Terceiro registro']);
+        ->assertSet('order', 'desc')
+        ->assertSeeInOrder(['Terceiro registro', 'Segundo registro', 'Primeiro registro']);
 });
 
-test('toggling the order lists logs newest first and back', function () {
+test('toggling the order lists logs oldest first and back', function () {
     createLog($this->user, 'positivo', now()->subDays(3), 'Primeiro registro');
     createLog($this->user, 'positivo', now()->subDays(1), 'Segundo registro');
     createLog($this->user, 'positivo', now(), 'Terceiro registro');
 
     Livewire::actingAs($this->user)
         ->test(History::class)
+        ->assertSet('order', 'desc')
+        ->call('toggleOrder')
         ->assertSet('order', 'asc')
+        ->assertSeeInOrder(['Primeiro registro', 'Segundo registro', 'Terceiro registro'])
         ->call('toggleOrder')
         ->assertSet('order', 'desc')
-        ->assertSeeInOrder(['Terceiro registro', 'Segundo registro', 'Primeiro registro'])
-        ->call('toggleOrder')
-        ->assertSet('order', 'asc')
-        ->assertSeeInOrder(['Primeiro registro', 'Segundo registro', 'Terceiro registro']);
+        ->assertSeeInOrder(['Terceiro registro', 'Segundo registro', 'Primeiro registro']);
 });
 
 test('quinzena period lists logs from the last 15 days only', function () {

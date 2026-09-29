@@ -155,78 +155,100 @@
 
         <!-- Registros -->
         <div>
-            <h3 class="text-sm font-semibold text-gray-500 mb-2">Registros</h3>
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm font-semibold text-gray-500">Registros</h3>
 
-            <div class="space-y-3">
-                @foreach ($this->logs as $log)
-                    @php
-                        $resisted = $log->outcome === CompulsionLog::OUTCOME_RESISTED;
-                        $before = $log->feelings->where('pivot.moment', CompulsionLog::MOMENT_BEFORE);
-                        $after = $log->feelings->where('pivot.moment', CompulsionLog::MOMENT_AFTER);
-                    @endphp
-                    <div
-                        wire:key="compulsion-log-{{ $log->id }}"
-                        class="{{ $resisted ? 'bg-green-50 border-green-500' : 'bg-indigo-50 border-indigo-500' }} shadow-sm sm:rounded-lg p-4 border-l-4"
-                        x-data="{ expanded: false }"
-                    >
-                        <div class="flex items-start justify-between gap-4">
-                            <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <span class="text-sm font-medium text-gray-800">{{ $log->occurred_at->translatedFormat('d/m, D \à\s H:i') }}</span>
-                                    <span class="text-xs font-semibold px-2 py-0.5 rounded-full {{ $resisted ? 'bg-green-700' : 'bg-indigo-700' }} text-white">{{ $resisted ? 'Resistiu' : 'Cedeu' }}</span>
-                                    <span class="text-xs text-gray-600">{{ $log->compulsion->name }}</span>
-                                    <span class="text-xs text-gray-500">vontade {{ $log->urge_intensity }}/10</span>
-                                    @if ($log->duration_minutes)
-                                        <span class="text-xs text-gray-500">{{ $log->duration_minutes }} min</span>
-                                    @endif
-                                </div>
-
-                                <div class="flex flex-wrap items-center gap-1 mt-2 text-xs">
-                                    @foreach ($before as $feeling)
-                                        <span class="px-2 py-0.5 rounded-full bg-white/80 text-gray-700 ring-1 ring-black/5">{{ $feeling->name }}</span>
-                                    @endforeach
-                                    <span class="text-gray-400 px-1" aria-label="depois">→</span>
-                                    @foreach ($after as $feeling)
-                                        <span class="px-2 py-0.5 rounded-full bg-white/80 text-gray-700 ring-1 ring-black/5">{{ $feeling->name }}</span>
-                                    @endforeach
-                                </div>
-
-                                <p class="text-sm text-gray-600 mt-2" x-show="!expanded">
-                                    {{ \Illuminate\Support\Str::limit($log->trigger, 120) }}
-                                </p>
-
-                                <div x-show="expanded" class="mt-2 space-y-2 text-sm text-gray-600">
-                                    <p><span class="font-medium text-gray-700">Situação:</span> {{ $log->trigger }}</p>
-                                    @if ($log->automatic_thought)
-                                        <p><span class="font-medium text-gray-700">Pensamento:</span> {{ $log->automatic_thought }}</p>
-                                    @endif
-                                    @if ($log->coping_strategy)
-                                        <p><span class="font-medium text-gray-700">{{ $resisted ? 'O que ajudou:' : 'O que poderia ter feito:' }}</span> {{ $log->coping_strategy }}</p>
-                                    @endif
-                                    @if ($log->notes)
-                                        <p><span class="font-medium text-gray-700">Observações:</span> {{ $log->notes }}</p>
-                                    @endif
-                                </div>
-
-                                <button type="button" x-on:click="expanded = !expanded" class="text-xs text-indigo-600 mt-2" x-text="expanded ? 'ver menos' : 'ver completo'"></button>
-                            </div>
-
-                            @unless ($readOnly)
-                                <div class="flex-shrink-0">
-                                    @if ($confirmingDeleteId === $log->id)
-                                        <div class="flex gap-2">
-                                            <button type="button" wire:click="delete({{ $log->id }})" class="text-xs text-red-600 font-medium">Confirmar</button>
-                                            <button type="button" wire:click="cancelDelete" class="text-xs text-gray-500">Cancelar</button>
-                                        </div>
-                                    @else
-                                        <button type="button" wire:click="confirmDelete({{ $log->id }})" class="text-xs text-gray-500 hover:text-red-600">Excluir</button>
-                                    @endif
-                                </div>
-                            @endunless
-                        </div>
-                    </div>
-                @endforeach
+                <button
+                    type="button"
+                    wire:click="toggleOrder"
+                    class="inline-flex items-center justify-center w-8 h-8 text-gray-600 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50"
+                    title="{{ $order === 'asc' ? 'Mais antigos primeiro (clique para inverter)' : 'Mais recentes primeiro (clique para inverter)' }}"
+                    aria-label="Inverter a ordem cronológica"
+                >
+                    <svg class="w-4 h-4 transition-transform {{ $order === 'desc' ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9M3 12h5m6 4 4 4m0 0 4-4m-4 4V8" />
+                    </svg>
+                </button>
             </div>
+
+            @foreach ($this->groupedLogs as $date => $dayLogs)
+                <div class="mb-6">
+                    <h4 class="text-sm font-semibold text-gray-500 mb-2">
+                        {{ \Illuminate\Support\Carbon::parse($date)->translatedFormat('l, d \d\e F') }}
+                    </h4>
+
+                    <div class="space-y-3">
+                        @foreach ($dayLogs as $log)
+                            @php
+                                $resisted = $log->outcome === CompulsionLog::OUTCOME_RESISTED;
+                                $before = $log->feelings->where('pivot.moment', CompulsionLog::MOMENT_BEFORE);
+                                $after = $log->feelings->where('pivot.moment', CompulsionLog::MOMENT_AFTER);
+                            @endphp
+                            <div
+                                wire:key="compulsion-log-{{ $log->id }}"
+                                class="{{ $resisted ? 'bg-green-50 border-green-500' : 'bg-indigo-50 border-indigo-500' }} shadow-sm sm:rounded-lg p-4 border-l-4"
+                                x-data="{ expanded: false }"
+                            >
+                                <div class="flex items-start justify-between gap-4">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <span class="text-sm font-medium text-gray-800">{{ $log->occurred_at->format('H:i') }}</span>
+                                            <span class="text-xs font-semibold px-2 py-0.5 rounded-full {{ $resisted ? 'bg-green-700' : 'bg-indigo-700' }} text-white">{{ $resisted ? 'Resistiu' : 'Cedeu' }}</span>
+                                            <span class="text-xs text-gray-600">{{ $log->compulsion->name }}</span>
+                                            <span class="text-xs text-gray-500">vontade {{ $log->urge_intensity }}/10</span>
+                                            @if ($log->duration_minutes)
+                                                <span class="text-xs text-gray-500">{{ $log->duration_minutes }} min</span>
+                                            @endif
+                                        </div>
+        
+                                        <div class="flex flex-wrap items-center gap-1 mt-2 text-xs">
+                                            @foreach ($before as $feeling)
+                                                <span class="px-2 py-0.5 rounded-full bg-white/80 text-gray-700 ring-1 ring-black/5">{{ $feeling->name }}</span>
+                                            @endforeach
+                                            <span class="text-gray-400 px-1" aria-label="depois">→</span>
+                                            @foreach ($after as $feeling)
+                                                <span class="px-2 py-0.5 rounded-full bg-white/80 text-gray-700 ring-1 ring-black/5">{{ $feeling->name }}</span>
+                                            @endforeach
+                                        </div>
+        
+                                        <p class="text-sm text-gray-600 mt-2" x-show="!expanded">
+                                            {{ \Illuminate\Support\Str::limit($log->trigger, 120) }}
+                                        </p>
+        
+                                        <div x-show="expanded" class="mt-2 space-y-2 text-sm text-gray-600">
+                                            <p><span class="font-medium text-gray-700">Situação:</span> {{ $log->trigger }}</p>
+                                            @if ($log->automatic_thought)
+                                                <p><span class="font-medium text-gray-700">Pensamento:</span> {{ $log->automatic_thought }}</p>
+                                            @endif
+                                            @if ($log->coping_strategy)
+                                                <p><span class="font-medium text-gray-700">{{ $resisted ? 'O que ajudou:' : 'O que poderia ter feito:' }}</span> {{ $log->coping_strategy }}</p>
+                                            @endif
+                                            @if ($log->notes)
+                                                <p><span class="font-medium text-gray-700">Observações:</span> {{ $log->notes }}</p>
+                                            @endif
+                                        </div>
+        
+                                        <button type="button" x-on:click="expanded = !expanded" class="text-xs text-indigo-600 mt-2" x-text="expanded ? 'ver menos' : 'ver completo'"></button>
+                                    </div>
+        
+                                    @unless ($readOnly)
+                                        <div class="flex-shrink-0">
+                                            @if ($confirmingDeleteId === $log->id)
+                                                <div class="flex gap-2">
+                                                    <button type="button" wire:click="delete({{ $log->id }})" class="text-xs text-red-600 font-medium">Confirmar</button>
+                                                    <button type="button" wire:click="cancelDelete" class="text-xs text-gray-500">Cancelar</button>
+                                                </div>
+                                            @else
+                                                <button type="button" wire:click="confirmDelete({{ $log->id }})" class="text-xs text-gray-500 hover:text-red-600">Excluir</button>
+                                            @endif
+                                        </div>
+                                    @endunless
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endforeach
 
             <div class="mt-4">
                 {{ $this->logs->links() }}

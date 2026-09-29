@@ -47,6 +47,7 @@ Route::middleware(['auth'])->group(function () {
 Route::prefix('compartilhado/{token}')->group(function () {
     Route::get('/', [ShareAccessController::class, 'showPin'])->name('share.pin');
     Route::post('/', [ShareAccessController::class, 'verifyPin'])->name('share.verify');
+    Route::get('/status', [ShareAccessController::class, 'status'])->middleware('throttle:30,1')->name('share.status');
 
     Route::middleware('share.access')->group(function () {
         Route::get('/dashboard', [ShareAccessController::class, 'dashboard'])->name('share.dashboard');
