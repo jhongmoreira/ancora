@@ -4,6 +4,7 @@ namespace App\Livewire\Concerns;
 
 use App\Models\Patient;
 use App\Models\ShareLink;
+use App\Services\ShareAccessSession;
 use Livewire\Attributes\Locked;
 
 /**
@@ -11,7 +12,7 @@ use Livewire\Attributes\Locked;
  * psicóloga ($readOnly=true). O middleware share.access só protege a carga
  * inicial da página; as interações (filtros, período, ordem) vão direto para
  * /livewire/update e, sem isso, continuariam retornando dados depois de o
- * link ser revogado ou expirar — docs/13.
+ * link ser revogado ou expirar, ou de o prazo do PIN acabar — docs/13.
  */
 trait GuardsSharedAccess
 {
@@ -37,7 +38,7 @@ trait GuardsSharedAccess
 
     protected function hasValidSharedAccess(): bool
     {
-        if (! $this->shareToken || ! session()->get("share_access.{$this->shareToken}")) {
+        if (! $this->shareToken) {
             return false;
         }
 
@@ -45,6 +46,7 @@ trait GuardsSharedAccess
 
         return $link
             && ! $link->isExpired()
-            && $link->patient_id === $this->patient?->id;
+            && $link->patient_id === $this->patient?->id
+            && app(ShareAccessSession::class)->isActive($this->shareToken);
     }
 }

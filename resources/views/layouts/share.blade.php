@@ -14,7 +14,20 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
+        {{-- Com paciente: fecha a página aberta quando o link expira, é revogado ou o prazo do PIN acaba (docs/13). --}}
+        <div
+            class="min-h-screen bg-gray-100"
+            @isset($patient)
+                x-data="ancoraShareGuard(@js([
+                    'statusUrl' => route('share.status', $token),
+                    'lockUrl' => route('share.pin', $token),
+                    'expiresInSeconds' => max(0, (int) now()->diffInSeconds($expiresAt)),
+                    'pinRemainingSeconds' => app(\App\Services\ShareAccessSession::class)->remainingSeconds($token),
+                    'pinValidityMinutes' => app(\App\Services\ShareAccessSession::class)->validityMinutes(),
+                    'expiresAtLabel' => $expiresAt->format('d/m \à\s H:i'),
+                ]))"
+            @endisset
+        >
             <nav class="bg-white border-b border-gray-100">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {{-- No celular: marca na 1ª linha e links na 2ª, ambos centralizados. A partir de sm, tudo numa linha à esquerda. --}}
@@ -45,7 +58,25 @@
             @isset($header)
                 <header class="bg-white shadow">
                     <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="min-w-0">
+                                {{ $header }}
+                            </div>
+
+                            @isset($patient)
+                                {{-- Contagem até a página ser fechada (prazo do PIN ou expiração do link, o que vier primeiro). --}}
+                                <span
+                                    role="timer"
+                                    class="inline-flex flex-shrink-0 items-center gap-1 pt-1 text-xs text-gray-400 tabular-nums"
+                                    x-bind:title="remainingTitle"
+                                >
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                                    </svg>
+                                    <span>Encerra em <span x-text="remainingLabel"></span></span>
+                                </span>
+                            @endisset
+                        </div>
 
                         @isset($patient)
                             <x-patient-info-bar :patient="$patient" :name="$patient->initials" :expires-at="$expiresAt" />
